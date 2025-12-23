@@ -60,12 +60,12 @@
 }
 
 .terminal {
-  background: #0a0e14;
+  background: #0a0e14 !important;
   overflow: hidden;
 }
 
 .header {
-  background: #0d1219;
+  background: #0d1219 !important;
   padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
@@ -106,7 +106,8 @@
   line-height: 1.7;
   min-height: 340px;
   transition: opacity 0.15s ease;
-  background: #0a0e14;
+  background: #0a0e14 !important;
+  color: #ffffff !important;
 }
 
 .content.fadeIn {
@@ -138,10 +139,11 @@
 
 .output {
   margin: 0;
-  color: #ffffff;
+  color: #ffffff !important;
   white-space: pre-wrap;
   word-break: break-word;
   font-weight: 400;
+  background: transparent !important;
 }
 
 /* Enhanced syntax highlighting with better contrast */
@@ -256,5 +258,70 @@
     font-size: 0.7rem;
     min-height: 260px;
   }
+}
+
+/* Force dark terminal appearance regardless of theme */
+[data-theme='light'] .container,
+[data-theme='dark'] .container {
+  background: #0a0e14 !important;
+}
+
+[data-theme='light'] .tabs,
+[data-theme='dark'] .tabs {
+  background: #1a1f2e !important;
+}
+
+[data-theme='light'] .terminal,
+[data-theme='dark'] .terminal {
+  background: #0a0e14 !important;
+}
+
+[data-theme='light'] .header,
+[data-theme='dark'] .header {
+  background: #0d1219 !important;
+}
+
+[data-theme='light'] .content,
+[data-theme='dark'] .content {
+  background: #0a0e14 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .output,
+[data-theme='dark'] .output {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+[data-theme='light'] .output *,
+[data-theme='dark'] .output * {
+  background: transparent !important;
+}
+
+[data-theme='light'] .command,
+[data-theme='dark'] .command {
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .prompt,
+[data-theme='dark'] .prompt {
+  color: #5eead4 !important;
+}
+
+/* Ensure pre and code elements don't get Docusaurus defaults */
+.output,
+.output pre,
+.output code {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.content pre {
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 

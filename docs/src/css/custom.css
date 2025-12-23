@@ -179,3 +179,32 @@
     font-size: 1.25rem;
   }
 }
+
+/* TerminalDemo component overrides - ensure proper contrast */
+[class*='TerminalDemo'] {
+  background: #0a0e14 !important;
+}
+
+[class*='TerminalDemo'] pre {
+  background: transparent !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+[class*='TerminalDemo'] pre code {
+  background: transparent !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+}
+
+/* Override any Docusaurus code block styles inside terminal */
+[class*='terminal'] pre,
+[class*='terminal'] code,
+[class*='content_'] pre,
+[class*='output_'] {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+}

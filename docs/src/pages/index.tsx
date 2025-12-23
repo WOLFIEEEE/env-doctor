@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -19,6 +19,32 @@ import {
 } from '@site/src/components/Icons';
 
 import styles from './index.module.css';
+
+const cursorPrompt = `Add env-doctor to this project to analyze and validate environment variables.
+
+Please do the following:
+
+1. Install the package:
+   npm install -D @theaccessibleteam/env-doctor
+
+2. Create a configuration file \`env-doctor.config.js\` in the project root with these settings:
+   - Detect the framework being used (Next.js, Vite, CRA, or Node.js)
+   - Set appropriate file patterns to scan
+   - Configure .env file paths
+   - Enable all analyzers: missing, unused, secrets, type-mismatch, sync-check
+
+3. Add npm scripts to package.json:
+   - "env:check": "env-doctor"
+   - "env:check:ci": "env-doctor --ci"
+   - "env:fix": "env-doctor --fix"
+
+4. If there's a CI/CD pipeline (GitHub Actions), add an env-doctor check step
+
+5. Create or update .env.example with placeholder values for all environment variables found in the codebase
+
+6. Run env-doctor and fix any issues found
+
+The package documentation is at: https://wolfieeee.github.io/env-doctor/`;
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -200,6 +226,67 @@ jobs:
   );
 }
 
+function CopyIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+  );
+}
+
+function CheckIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6 9 17l-5-5"/>
+    </svg>
+  );
+}
+
+function PromptSection() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(cursorPrompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <section className={styles.promptSection}>
+      <div className="container">
+        <div className={styles.sectionHeader}>
+          <Heading as="h2">Cursor AI Setup</Heading>
+          <p>Copy this prompt to instantly set up env-doctor in your project</p>
+        </div>
+        <div className={styles.promptCard}>
+          <div className={styles.promptHeader}>
+            <div className={styles.promptHeaderLeft}>
+              <span className={styles.promptLabel}>Cursor AI Prompt</span>
+              <span className={styles.promptHint}>Paste into Cursor chat</span>
+            </div>
+            <button 
+              className={`${styles.copyButton} ${copied ? styles.copied : ''}`}
+              onClick={handleCopy}
+              aria-label={copied ? 'Copied!' : 'Copy prompt'}
+            >
+              {copied ? <CheckIcon /> : <CopyIcon />}
+              <span>{copied ? 'Copied!' : 'Copy'}</span>
+            </button>
+          </div>
+          <pre className={styles.promptCode}>
+            <code>{cursorPrompt}</code>
+          </pre>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home(): JSX.Element {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -210,6 +297,7 @@ export default function Home(): JSX.Element {
       <main>
         <FeaturesSection />
         <DemoSection />
+        <PromptSection />
         <CISection />
       </main>
     </Layout>
