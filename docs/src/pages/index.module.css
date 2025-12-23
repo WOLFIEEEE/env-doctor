@@ -1,0 +1,264 @@
+/* Hero Section */
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 4rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.heroSubtitle {
+  font-size: 1.75rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 0.5rem;
+}
+
+.heroDescription {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.buttons .button--secondary {
+  background: white;
+  color: #059669;
+  border: none;
+}
+
+.buttons .button--secondary:hover {
+  background: #f0fdf4;
+}
+
+.buttons .button--outline {
+  border-color: white;
+  color: white;
+}
+
+.buttons .button--outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.installCommand {
+  background: rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 1.1rem;
+  color: white;
+}
+
+/* Features Section */
+.features {
+  padding: 4rem 0;
+  background: var(--ifm-background-color);
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.sectionHeader h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader p {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.featureCard {
+  background: var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.featureCard h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.featureCard p {
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* Demo Section */
+.demoSection {
+  padding: 4rem 0;
+  background: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .demoSection {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.demoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.demoText h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.demoText p {
+  font-size: 1.1rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 1.5rem;
+}
+
+.demoFeatures {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.demoFeatures li {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.demoTerminal {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Terminal Demo */
+.terminalDemo {
+  background: #0f172a;
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+}
+
+.terminalHeader {
+  background: #1e293b;
+  padding: 0.75rem 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.terminalDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminalDot.red { background: #ef4444; }
+.terminalDot.yellow { background: #eab308; }
+.terminalDot.green { background: #22c55e; }
+
+.terminalContent {
+  padding: 1rem 1.5rem;
+  overflow-x: auto;
+}
+
+.terminalContent pre {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+/* CI Section */
+.ciSection {
+  padding: 4rem 0;
+  background: var(--ifm-background-color);
+  text-align: center;
+}
+
+.ciExample {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  text-align: left;
+}
+
+.codeBlock {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+
+/* Responsive */
+@media (max-width: 996px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.5rem;
+  }
+  
+  .heroDescription {
+    font-size: 1.1rem;
+  }
+  
+  .demoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .demoTerminal {
+    order: -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+}

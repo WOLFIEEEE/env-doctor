@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="icon512Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <filter id="icon512Shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="url(#icon512Grad)" filter="url(#icon512Shadow)"/>
+  <circle cx="256" cy="288" r="80" fill="none" stroke="white" stroke-width="24"/>
+  <circle cx="256" cy="288" r="40" fill="white"/>
+  <path d="M 256 208 Q 256 160 208 144" fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
+  <path d="M 256 208 Q 256 160 304 144" fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="192" cy="128" r="24" fill="white"/>
+  <circle cx="320" cy="128" r="24" fill="white"/>
+</svg>
+

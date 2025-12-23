@@ -1,0 +1,88 @@
+{
+  "name": "env-doctor",
+  "version": "1.0.0",
+  "description": "Analyze and validate environment variables in your codebase. Detect missing, unused, and misconfigured env vars with framework-aware scanning.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "env-doctor": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build",
+    "release": "changeset publish",
+    "docs:dev": "cd docs && npm run start",
+    "docs:build": "cd docs && npm run build",
+    "icons:generate": "node scripts/generate-icons.js"
+  },
+  "keywords": [
+    "env",
+    "environment",
+    "variables",
+    "dotenv",
+    "linter",
+    "validator",
+    "security",
+    "secrets",
+    "cli",
+    "nextjs",
+    "vite",
+    "react",
+    "typescript",
+    "devtools",
+    "dx"
+  ],
+  "author": "env-doctor contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WOLFIEEEE/env-doctor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/khushwantparihar/env-doctor/issues"
+  },
+  "homepage": "https://khushwantparihar.github.io/env-doctor",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.2.1",
+    "@typescript-eslint/typescript-estree": "^8.18.2",
+    "commander": "^12.1.0",
+    "glob": "^11.0.0",
+    "picocolors": "^1.1.1",
+    "simple-git": "^3.27.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.11",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
