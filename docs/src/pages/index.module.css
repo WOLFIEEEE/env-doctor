@@ -25,6 +25,29 @@
   margin-bottom: 0.5rem;
 }
 
+.badges {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.badges a {
+  display: inline-flex;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.badges a:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.badges img {
+  height: 24px;
+  border-radius: 4px;
+}
+
 .heroDescription {
   font-size: 1.25rem;
   color: rgba(255, 255, 255, 0.85);
@@ -64,8 +87,10 @@
 .installCommand {
   background: #1a1a1a !important;
   backdrop-filter: blur(8px);
-  display: inline-block;
-  padding: 0.875rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem 0.875rem 1.75rem;
   border-radius: 10px;
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
   font-size: 1rem;
@@ -73,6 +98,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .installCommand:hover {
@@ -90,6 +116,32 @@
   font-size: inherit;
   border: none !important;
   font-family: inherit;
+}
+
+.installCopyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.installCopyBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.installCopyBtn.copied {
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+  color: white;
 }
 
 /* Override any Docusaurus default code styles - use solid dark background */

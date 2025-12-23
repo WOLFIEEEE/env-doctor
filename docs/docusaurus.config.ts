@@ -75,6 +75,11 @@ const config: Config = {
           label: 'Docs',
         },
         {
+          to: '/playground',
+          label: 'Playground',
+          position: 'left',
+        },
+        {
           to: '/docs/cli-reference',
           label: 'CLI',
           position: 'left',

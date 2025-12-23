@@ -48,6 +48,19 @@ The package documentation is at: https://wolfieeee.github.io/env-doctor/`;
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
+  const [installCopied, setInstallCopied] = useState(false);
+  const installCommand = 'npx @theaccessibleteam/env-doctor';
+
+  const handleInstallCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(installCommand);
+      setInstallCopied(true);
+      setTimeout(() => setInstallCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
@@ -56,6 +69,17 @@ function HomepageHeader() {
             {siteConfig.title}
           </Heading>
           <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
+          <div className={styles.badges}>
+            <a href="https://www.npmjs.com/package/@theaccessibleteam/env-doctor" target="_blank" rel="noopener noreferrer">
+              <img src="https://img.shields.io/npm/dm/@theaccessibleteam/env-doctor?style=flat-square&color=10b981" alt="npm downloads" />
+            </a>
+            <a href="https://github.com/WOLFIEEEE/env-doctor" target="_blank" rel="noopener noreferrer">
+              <img src="https://img.shields.io/github/stars/WOLFIEEEE/env-doctor?style=flat-square&color=10b981" alt="GitHub stars" />
+            </a>
+            <a href="https://www.npmjs.com/package/@theaccessibleteam/env-doctor" target="_blank" rel="noopener noreferrer">
+              <img src="https://img.shields.io/npm/v/@theaccessibleteam/env-doctor?style=flat-square&color=10b981" alt="npm version" />
+            </a>
+          </div>
           <p className={styles.heroDescription}>
             Detect missing, unused, and misconfigured environment variables before they cause runtime errors.
             Framework-aware scanning for Next.js, Vite, and more.
@@ -72,8 +96,15 @@ function HomepageHeader() {
               Documentation
             </Link>
           </div>
-          <div className={styles.installCommand}>
-            <code>npx @theaccessibleteam/env-doctor</code>
+          <div className={styles.installCommand} onClick={handleInstallCopy} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleInstallCopy()}>
+            <code>{installCommand}</code>
+            <button 
+              className={`${styles.installCopyBtn} ${installCopied ? styles.copied : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleInstallCopy(); }}
+              aria-label={installCopied ? 'Copied!' : 'Copy command'}
+            >
+              {installCopied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
+            </button>
           </div>
         </div>
       </div>

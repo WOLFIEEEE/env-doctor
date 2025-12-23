@@ -48,6 +48,15 @@ const sidebars: SidebarsConfig = {
         'examples/custom-rules',
       ],
     },
+    {
+      type: 'category',
+      label: 'Help',
+      collapsed: false,
+      items: [
+        'faq',
+        'troubleshooting',
+      ],
+    },
   ],
 };
 

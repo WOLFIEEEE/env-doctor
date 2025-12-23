@@ -1,0 +1,324 @@
+.playground {
+  background: var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.header {
+  padding: 1.25rem 1.5rem;
+  background: var(--ifm-color-emphasis-100);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.scenarioSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenarioSelector label {
+  font-weight: 600;
+  color: var(--ifm-heading-color) !important;
+}
+
+.select {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.select:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700) !important;
+  font-weight: 500;
+}
+
+.editors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--ifm-color-emphasis-200);
+}
+
+.editorPanel {
+  background: var(--ifm-background-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.editorTitle {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ifm-heading-color);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.editorHint {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-500);
+}
+
+.editor {
+  flex: 1;
+  min-height: 250px;
+  padding: 1rem;
+  border: none;
+  resize: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: #0a0e14 !important;
+  color: #ffffff !important;
+}
+
+.editor:focus {
+  outline: none;
+}
+
+.editor::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.7;
+}
+
+/* Results Section */
+.results {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--ifm-color-emphasis-100);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.resultsTitle {
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.resultsSummary {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.errorBadge,
+.warningBadge,
+.successBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.errorBadge {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.warningBadge {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.successBadge {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+[data-theme='dark'] .errorBadge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+[data-theme='dark'] .warningBadge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+}
+
+[data-theme='dark'] .successBadge {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+}
+
+.resultsList {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.resultItem {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.resultItem.error {
+  border-left: 3px solid #ef4444;
+}
+
+.resultItem.warning {
+  border-left: 3px solid #f59e0b;
+}
+
+.resultItem.success {
+  border-left: 3px solid #22c55e;
+}
+
+.resultIcon {
+  font-size: 1.1rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultItem.error .resultIcon {
+  color: #ef4444;
+}
+
+.resultItem.warning .resultIcon {
+  color: #f59e0b;
+}
+
+.resultItem.success .resultIcon {
+  color: #22c55e;
+}
+
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.resultCategory {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.resultMessage {
+  font-weight: 500;
+  color: var(--ifm-heading-color);
+}
+
+.resultDetails {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Force dark editor appearance regardless of theme for better contrast */
+[data-theme='light'] .editor,
+[data-theme='dark'] .editor {
+  background: #0a0e14 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .editor::placeholder,
+[data-theme='dark'] .editor::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.7;
+}
+
+/* Ensure editor headers have good contrast */
+.editorHeader {
+  background: var(--ifm-color-emphasis-100) !important;
+}
+
+.editorTitle {
+  color: var(--ifm-heading-color) !important;
+  font-weight: 600;
+}
+
+.editorHint {
+  color: var(--ifm-color-emphasis-600) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .editors {
+    grid-template-columns: 1fr;
+  }
+  
+  .editor {
+    min-height: 180px;
+  }
+  
+  .resultsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .scenarioSelector {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .select {
+    width: 100%;
+  }
+}
+
+/* Scrollbar styling */
+.resultsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultsList::-webkit-scrollbar-track {
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 3px;
+}
+
+.resultsList::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-emphasis-300);
+  border-radius: 3px;
+}
+
+.resultsList::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-emphasis-400);
+}
+
