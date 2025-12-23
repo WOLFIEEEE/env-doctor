@@ -42,7 +42,7 @@ function HomepageHeader() {
             </Link>
             <Link
               className="button button--outline button--lg"
-              to="/docs">
+              to="/docs/getting-started/installation">
               Documentation
             </Link>
           </div>
