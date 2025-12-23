@@ -1,5 +1,5 @@
 {
-  "name": "env-doctor",
+  "name": "@theaccessibleteam/env-doctor",
   "version": "1.0.0",
   "description": "Analyze and validate environment variables in your codebase. Detect missing, unused, and misconfigured env vars with framework-aware scanning.",
   "type": "module",
@@ -26,6 +26,9 @@
     "LICENSE",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -63,9 +66,9 @@
     "url": "git+https://github.com/WOLFIEEEE/env-doctor.git"
   },
   "bugs": {
-    "url": "https://github.com/khushwantparihar/env-doctor/issues"
+    "url": "https://github.com/WOLFIEEEE/env-doctor/issues"
   },
-  "homepage": "https://khushwantparihar.github.io/env-doctor",
+  "homepage": "https://WOLFIEEEE.github.io/env-doctor",
   "engines": {
     "node": ">=20.0.0"
   },
