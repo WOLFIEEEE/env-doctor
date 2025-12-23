@@ -1,6 +1,6 @@
 {
   "name": "@theaccessibleteam/env-doctor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Analyze and validate environment variables in your codebase. Detect missing, unused, and misconfigured env vars with framework-aware scanning.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -67,8 +67,15 @@
     "devtools",
     "dx"
   ],
-  "author": "The Accessible Team",
+  "author": {
+    "name": "The Accessible Team",
+    "url": "https://github.com/WOLFIEEEE"
+  },
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/WOLFIEEEE"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WOLFIEEEE/env-doctor.git"

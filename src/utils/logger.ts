@@ -12,14 +12,12 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 
 class Logger {
   private level: LogLevel = 'info';
-  private verbose = false;
 
   setLevel(level: LogLevel) {
     this.level = level;
   }
 
   setVerbose(verbose: boolean) {
-    this.verbose = verbose;
     if (verbose) {
       this.level = 'debug';
     }

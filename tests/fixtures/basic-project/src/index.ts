@@ -17,7 +17,7 @@ const missingVar = process.env.MISSING_VAR;
 const nodeEnv = process.env['NODE_ENV'];
 
 // Destructuring
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY: _SECRET_KEY } = process.env;
 
 export function getConfig() {
   return {
