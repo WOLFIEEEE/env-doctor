@@ -1,0 +1,27 @@
+{
+  "id": "features/missing-vars",
+  "title": "Missing Variable Detection",
+  "description": "Detect environment variables that are used in your code but not defined in your .env files.",
+  "source": "@site/docs/features/missing-vars.md",
+  "sourceDirName": "features",
+  "slug": "/features/missing-vars",
+  "permalink": "/env-doctor/docs/features/missing-vars",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/features/missing-vars.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Configuration",
+    "permalink": "/env-doctor/docs/getting-started/configuration"
+  },
+  "next": {
+    "title": "Unused Variable Detection",
+    "permalink": "/env-doctor/docs/features/unused-vars"
+  }
+}

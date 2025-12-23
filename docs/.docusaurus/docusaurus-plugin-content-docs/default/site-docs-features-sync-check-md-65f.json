@@ -1,0 +1,27 @@
+{
+  "id": "features/sync-check",
+  "title": "Sync Check",
+  "description": "Keep your .env and .env.example files in sync.",
+  "source": "@site/docs/features/sync-check.md",
+  "sourceDirName": "features",
+  "slug": "/features/sync-check",
+  "permalink": "/env-doctor/docs/features/sync-check",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/features/sync-check.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Secret Detection",
+    "permalink": "/env-doctor/docs/features/secret-detection"
+  },
+  "next": {
+    "title": "Next.js",
+    "permalink": "/env-doctor/docs/frameworks/nextjs"
+  }
+}

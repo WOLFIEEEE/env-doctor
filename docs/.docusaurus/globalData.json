@@ -1,0 +1,118 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/env-doctor/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/env-doctor/docs",
+          "mainDocId": "intro",
+          "docs": [
+            {
+              "id": "api-reference",
+              "path": "/env-doctor/docs/api-reference",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "ci-integration",
+              "path": "/env-doctor/docs/ci-integration",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "cli-reference",
+              "path": "/env-doctor/docs/cli-reference",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "examples/basic-usage",
+              "path": "/env-doctor/docs/examples/basic-usage",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "examples/custom-rules",
+              "path": "/env-doctor/docs/examples/custom-rules",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "examples/monorepo",
+              "path": "/env-doctor/docs/examples/monorepo",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "features/missing-vars",
+              "path": "/env-doctor/docs/features/missing-vars",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "features/secret-detection",
+              "path": "/env-doctor/docs/features/secret-detection",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "features/sync-check",
+              "path": "/env-doctor/docs/features/sync-check",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "features/type-checking",
+              "path": "/env-doctor/docs/features/type-checking",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "features/unused-vars",
+              "path": "/env-doctor/docs/features/unused-vars",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "frameworks/cra",
+              "path": "/env-doctor/docs/frameworks/cra",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "frameworks/nextjs",
+              "path": "/env-doctor/docs/frameworks/nextjs",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "frameworks/vite",
+              "path": "/env-doctor/docs/frameworks/vite",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "getting-started/configuration",
+              "path": "/env-doctor/docs/getting-started/configuration",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "getting-started/installation",
+              "path": "/env-doctor/docs/getting-started/installation",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "getting-started/quick-start",
+              "path": "/env-doctor/docs/getting-started/quick-start",
+              "sidebar": "docsSidebar"
+            },
+            {
+              "id": "intro",
+              "path": "/env-doctor/docs/",
+              "sidebar": "docsSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "docsSidebar": {
+              "link": {
+                "path": "/env-doctor/docs/",
+                "label": "intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "getting-started/configuration",
+  "title": "Configuration",
+  "description": "Customize env-doctor behavior with a configuration file.",
+  "source": "@site/docs/getting-started/configuration.md",
+  "sourceDirName": "getting-started",
+  "slug": "/getting-started/configuration",
+  "permalink": "/env-doctor/docs/getting-started/configuration",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/getting-started/configuration.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Quick Start",
+    "permalink": "/env-doctor/docs/getting-started/quick-start"
+  },
+  "next": {
+    "title": "Missing Variable Detection",
+    "permalink": "/env-doctor/docs/features/missing-vars"
+  }
+}

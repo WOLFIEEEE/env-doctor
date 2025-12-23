@@ -1,0 +1,27 @@
+{
+  "id": "frameworks/vite",
+  "title": "Vite",
+  "description": "env-doctor supports Vite projects with import.meta.env detection.",
+  "source": "@site/docs/frameworks/vite.md",
+  "sourceDirName": "frameworks",
+  "slug": "/frameworks/vite",
+  "permalink": "/env-doctor/docs/frameworks/vite",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/frameworks/vite.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Next.js",
+    "permalink": "/env-doctor/docs/frameworks/nextjs"
+  },
+  "next": {
+    "title": "Create React App",
+    "permalink": "/env-doctor/docs/frameworks/cra"
+  }
+}

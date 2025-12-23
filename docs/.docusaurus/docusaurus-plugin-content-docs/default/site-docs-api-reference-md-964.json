@@ -1,0 +1,27 @@
+{
+  "id": "api-reference",
+  "title": "API Reference",
+  "description": "Use env-doctor programmatically in your Node.js applications.",
+  "source": "@site/docs/api-reference.md",
+  "sourceDirName": ".",
+  "slug": "/api-reference",
+  "permalink": "/env-doctor/docs/api-reference",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/api-reference.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 11,
+  "frontMatter": {
+    "sidebar_position": 11
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "CLI Reference",
+    "permalink": "/env-doctor/docs/cli-reference"
+  },
+  "next": {
+    "title": "CI/CD Integration",
+    "permalink": "/env-doctor/docs/ci-integration"
+  }
+}

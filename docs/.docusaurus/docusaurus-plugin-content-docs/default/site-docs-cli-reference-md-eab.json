@@ -1,0 +1,27 @@
+{
+  "id": "cli-reference",
+  "title": "CLI Reference",
+  "description": "Complete reference for all env-doctor commands and options.",
+  "source": "@site/docs/cli-reference.md",
+  "sourceDirName": ".",
+  "slug": "/cli-reference",
+  "permalink": "/env-doctor/docs/cli-reference",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/cli-reference.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 10,
+  "frontMatter": {
+    "sidebar_position": 10
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Create React App",
+    "permalink": "/env-doctor/docs/frameworks/cra"
+  },
+  "next": {
+    "title": "API Reference",
+    "permalink": "/env-doctor/docs/api-reference"
+  }
+}

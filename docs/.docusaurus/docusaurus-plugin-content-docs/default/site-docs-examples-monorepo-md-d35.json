@@ -1,0 +1,27 @@
+{
+  "id": "examples/monorepo",
+  "title": "Monorepo Setup",
+  "description": "Configure env-doctor for monorepo projects with multiple packages.",
+  "source": "@site/docs/examples/monorepo.md",
+  "sourceDirName": "examples",
+  "slug": "/examples/monorepo",
+  "permalink": "/env-doctor/docs/examples/monorepo",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/examples/monorepo.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Basic Usage",
+    "permalink": "/env-doctor/docs/examples/basic-usage"
+  },
+  "next": {
+    "title": "Custom Rules",
+    "permalink": "/env-doctor/docs/examples/custom-rules"
+  }
+}

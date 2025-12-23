@@ -1,0 +1,27 @@
+{
+  "id": "ci-integration",
+  "title": "CI/CD Integration",
+  "description": "Add env-doctor to your CI pipeline to catch environment issues before they reach production.",
+  "source": "@site/docs/ci-integration.md",
+  "sourceDirName": ".",
+  "slug": "/ci-integration",
+  "permalink": "/env-doctor/docs/ci-integration",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/khushwantparihar/env-doctor/tree/main/docs/docs/ci-integration.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 12,
+  "frontMatter": {
+    "sidebar_position": 12
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "API Reference",
+    "permalink": "/env-doctor/docs/api-reference"
+  },
+  "next": {
+    "title": "Basic Usage",
+    "permalink": "/env-doctor/docs/examples/basic-usage"
+  }
+}
