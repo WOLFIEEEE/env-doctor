@@ -1,0 +1,17 @@
+# Default owners for everything in the repo
+* @WOLFIEEEE
+
+# Source code
+/src/ @WOLFIEEEE
+
+# Documentation
+/docs/ @WOLFIEEEE
+*.md @WOLFIEEEE
+
+# Configuration
+*.json @WOLFIEEEE
+*.ts @WOLFIEEEE
+*.js @WOLFIEEEE
+
+# GitHub Actions
+/.github/ @WOLFIEEEE

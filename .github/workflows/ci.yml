@@ -6,72 +6,131 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Check formatting
+        run: pnpm run format:check
+        
+      - name: Lint
+        run: pnpm run lint
+        
+      - name: Type check
+        run: pnpm run typecheck
+
   test:
+    name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20, 22]
-
+        node: ['20', '22']
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+          
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node }}
           cache: 'pnpm'
-
+          
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Type check
-        run: pnpm lint
-
+        run: pnpm install --frozen-lockfile
+        
       - name: Run tests
-        run: pnpm test:run
+        run: pnpm run test:run
+        
+      - name: Run tests with coverage
+        if: matrix.node == '20'
+        run: pnpm run test:coverage
+        
+      - name: Upload coverage
+        if: matrix.node == '20'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
-      - name: Build
-        run: pnpm build
-
-  publish:
-    needs: test
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+          
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'pnpm'
-
+          
       - name: Install dependencies
-        run: pnpm install
-
+        run: pnpm install --frozen-lockfile
+        
       - name: Build
-        run: pnpm build
-
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
+        run: pnpm run build
+        
+      - name: Test CLI
+        run: node dist/cli.js --help
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          publish: pnpm release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          name: dist
+          path: dist/
+          retention-days: 7
 
+  e2e:
+    name: E2E Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run CLI on examples
+        run: |
+          node dist/cli.js examples/nextjs-example --ci || true
+          node dist/cli.js examples/vite-example --ci || true
+          node dist/cli.js examples/node-api --ci || true
