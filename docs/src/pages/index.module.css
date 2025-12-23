@@ -111,14 +111,35 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+.featureCard:hover .featureIcon {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.featureIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  color: var(--ifm-color-primary);
+  transition: all 0.2s ease;
+}
+
 .featureCard h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   margin-bottom: 0.5rem;
+  color: var(--ifm-heading-color);
 }
 
 .featureCard p {
   color: var(--ifm-color-emphasis-700);
   margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 /* Demo Section */
@@ -173,7 +194,11 @@
 }
 
 .demoFeatureIcon {
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-primary);
+  flex-shrink: 0;
 }
 
 .demoCTA {

@@ -126,29 +126,86 @@
   color: #ffffff;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   font-weight: 500;
 }
 
 .prompt {
-  color: #22d3ee;
+  color: #5eead4;
   margin-right: 0.75rem;
   font-weight: 700;
 }
 
 .output {
   margin: 0;
-  color: #e8eaed;
+  color: #ffffff;
   white-space: pre-wrap;
   word-break: break-word;
   font-weight: 400;
 }
 
-/* Syntax highlighting for output */
-.output :global(.error) { color: #ef4444; }
-.output :global(.warning) { color: #eab308; }
-.output :global(.success) { color: #22c55e; }
-.output :global(.info) { color: #3b82f6; }
+/* Enhanced syntax highlighting with better contrast */
+.output :global(.error) { 
+  color: #ff6b6b; 
+  font-weight: 500;
+}
+.output :global(.warning) { 
+  color: #ffd93d; 
+  font-weight: 500;
+}
+.output :global(.success) { 
+  color: #51cf66; 
+  font-weight: 500;
+}
+.output :global(.info) { 
+  color: #74c0fc; 
+  font-weight: 500;
+}
+
+/* Error, warning, and success symbols with high contrast */
+.errorSymbol {
+  color: #ff6b6b;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.warningSymbol {
+  color: #ffd93d;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.successSymbol {
+  color: #51cf66;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* Variable names - bright white for maximum contrast */
+.variableName {
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+}
+
+/* File paths - light cyan for good contrast */
+.filePath {
+  color: #74c0fc;
+  font-weight: 500;
+}
+
+/* Summary lines - bright white */
+.summaryLine {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Ensure all text in output is readable */
+.output code,
+.output strong {
+  color: #ffffff;
+  font-weight: 600;
+}
 
 @media (max-width: 768px) {
   .tabs {

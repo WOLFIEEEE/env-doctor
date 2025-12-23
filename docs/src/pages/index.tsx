@@ -1,9 +1,22 @@
+import React from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import TerminalDemo from '@site/src/components/TerminalDemo';
+import {
+  SearchIcon,
+  TrashIcon,
+  LockIcon,
+  BarChartIcon,
+  RefreshIcon,
+  ZapIcon,
+  ScanIcon,
+  CodeIcon,
+  FileSearchIcon,
+  SettingsIcon,
+} from '@site/src/components/Icons';
 
 import styles from './index.module.css';
 
@@ -14,7 +27,7 @@ function HomepageHeader() {
       <div className="container">
         <div className={styles.heroContent}>
           <Heading as="h1" className={styles.heroTitle}>
-            🩺 {siteConfig.title}
+            {siteConfig.title}
           </Heading>
           <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
           <p className={styles.heroDescription}>
@@ -25,12 +38,12 @@ function HomepageHeader() {
             <Link
               className="button button--secondary button--lg"
               to="/docs/getting-started/installation">
-              Get Started →
+              Get Started
             </Link>
             <Link
               className="button button--outline button--lg"
               to="/docs">
-              Learn More
+              Documentation
             </Link>
           </div>
           <div className={styles.installCommand}>
@@ -44,34 +57,47 @@ function HomepageHeader() {
 
 const features = [
   {
-    title: '🔍 Missing Variable Detection',
+    title: 'Missing Variable Detection',
     description: 'Find environment variables used in your code that aren\'t defined in your .env files.',
+    icon: <SearchIcon size={24} />,
   },
   {
-    title: '🧹 Unused Variable Detection',
+    title: 'Unused Variable Detection',
     description: 'Identify variables defined in .env but never referenced in your codebase.',
+    icon: <TrashIcon size={24} />,
   },
   {
-    title: '🔐 Secret Detection',
+    title: 'Secret Detection',
     description: 'Detect exposed API keys, tokens, and credentials with built-in patterns for 20+ services.',
+    icon: <LockIcon size={24} />,
   },
   {
-    title: '📊 Type Validation',
+    title: 'Type Validation',
     description: 'Catch type mismatches like using parseInt() on non-numeric values.',
+    icon: <BarChartIcon size={24} />,
   },
   {
-    title: '🔄 Sync Check',
+    title: 'Sync Check',
     description: 'Keep .env and .env.example in sync automatically.',
+    icon: <RefreshIcon size={24} />,
   },
   {
-    title: '⚡ Framework Support',
+    title: 'Framework Support',
     description: 'Auto-detect Next.js, Vite, and CRA with framework-specific rules.',
+    icon: <ZapIcon size={24} />,
   },
 ];
 
-function FeatureCard({title, description}: {title: string; description: string}) {
+interface FeatureProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+function FeatureCard({title, description, icon}: FeatureProps) {
   return (
     <div className={styles.featureCard}>
+      <div className={styles.featureIcon}>{icon}</div>
       <h3>{title}</h3>
       <p>{description}</p>
     </div>
@@ -110,19 +136,19 @@ function DemoSection() {
         <div className={styles.demoDescription}>
           <div className={styles.demoFeatureGrid}>
             <div className={styles.demoFeatureItem}>
-              <span className={styles.demoFeatureIcon}>🔍</span>
+              <span className={styles.demoFeatureIcon}><ScanIcon size={20} /></span>
               <span>AST-based scanning for accurate detection</span>
             </div>
             <div className={styles.demoFeatureItem}>
-              <span className={styles.demoFeatureIcon}>⚡</span>
+              <span className={styles.demoFeatureIcon}><ZapIcon size={20} /></span>
               <span>Framework-aware (Next.js, Vite, CRA)</span>
             </div>
             <div className={styles.demoFeatureItem}>
-              <span className={styles.demoFeatureIcon}>📊</span>
+              <span className={styles.demoFeatureIcon}><CodeIcon size={20} /></span>
               <span>SARIF output for GitHub Code Scanning</span>
             </div>
             <div className={styles.demoFeatureItem}>
-              <span className={styles.demoFeatureIcon}>🛠️</span>
+              <span className={styles.demoFeatureIcon}><SettingsIcon size={20} /></span>
               <span>Interactive fix mode</span>
             </div>
           </div>
@@ -130,7 +156,7 @@ function DemoSection() {
             <Link
               className="button button--primary button--lg"
               to="/docs/getting-started/quick-start">
-              Quick Start Guide →
+              Quick Start Guide
             </Link>
           </div>
         </div>
