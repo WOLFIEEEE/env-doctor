@@ -62,13 +62,33 @@
 }
 
 .installCommand {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Fira Code', monospace;
-  font-size: 1.1rem;
-  color: white;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  font-size: 1rem;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.installCommand:hover {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.installCommand code {
+  background: transparent;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0;
+  font-size: inherit;
+  border: none;
 }
 
 /* Features Section */
