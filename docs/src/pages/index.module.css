@@ -62,33 +62,66 @@
 }
 
 .installCommand {
-  background: rgba(0, 0, 0, 0.35);
+  background: #1a1a1a !important;
   backdrop-filter: blur(8px);
   display: inline-block;
   padding: 0.875rem 1.75rem;
   border-radius: 10px;
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
   font-size: 1rem;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
 }
 
 .installCommand:hover {
-  background: rgba(0, 0, 0, 0.45);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: #0f0f0f !important;
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
 }
 
 .installCommand code {
-  background: transparent;
-  color: #ffffff;
+  background: transparent !important;
+  color: #ffffff !important;
   font-weight: 500;
-  padding: 0;
+  padding: 0 !important;
   font-size: inherit;
-  border: none;
+  border: none !important;
+  font-family: inherit;
+}
+
+/* Override any Docusaurus default code styles - use solid dark background */
+.heroBanner .installCommand,
+.heroBanner .installCommand code {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Ensure code element doesn't inherit white background from Docusaurus */
+.heroBanner code {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Light theme override (though hero should always be green) */
+[data-theme='light'] .heroBanner .installCommand,
+[data-theme='light'] .heroBanner .installCommand code {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .heroBanner .installCommand,
+[data-theme='dark'] .heroBanner .installCommand code {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Hover states for all themes */
+.heroBanner .installCommand:hover,
+.heroBanner .installCommand:hover code {
+  background-color: #0f0f0f !important;
 }
 
 /* Features Section */
