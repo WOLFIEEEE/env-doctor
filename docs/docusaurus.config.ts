@@ -85,7 +85,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://www.npmjs.com/package/env-doctor',
+          href: 'https://www.npmjs.com/package/@theaccessibleteam/env-doctor',
           label: 'npm',
           position: 'right',
         },
@@ -137,7 +137,7 @@ const config: Config = {
             },
             {
               label: 'npm',
-              href: 'https://www.npmjs.com/package/env-doctor',
+              href: 'https://www.npmjs.com/package/@theaccessibleteam/env-doctor',
             },
             {
               label: 'Contributing',
@@ -146,7 +146,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} env-doctor. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} The Accessible Team. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

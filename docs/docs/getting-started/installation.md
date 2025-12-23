@@ -11,7 +11,7 @@ env-doctor can be installed globally or run directly with npx.
 The easiest way to use env-doctor is with npx - no installation required:
 
 ```bash
-npx env-doctor
+npx @theaccessibleteam/env-doctor
 ```
 
 This always uses the latest version.
@@ -27,21 +27,21 @@ import TabItem from '@theme/TabItem';
   <TabItem value="npm" label="npm" default>
 
 ```bash
-npm install -g env-doctor
+npm install -g @theaccessibleteam/env-doctor
 ```
 
   </TabItem>
   <TabItem value="pnpm" label="pnpm">
 
 ```bash
-pnpm add -g env-doctor
+pnpm add -g @theaccessibleteam/env-doctor
 ```
 
   </TabItem>
   <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn global add env-doctor
+yarn global add @theaccessibleteam/env-doctor
 ```
 
   </TabItem>
@@ -61,21 +61,21 @@ Install as a dev dependency in your project:
   <TabItem value="npm" label="npm" default>
 
 ```bash
-npm install -D env-doctor
+npm install -D @theaccessibleteam/env-doctor
 ```
 
   </TabItem>
   <TabItem value="pnpm" label="pnpm">
 
 ```bash
-pnpm add -D env-doctor
+pnpm add -D @theaccessibleteam/env-doctor
 ```
 
   </TabItem>
   <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add -D env-doctor
+yarn add -D @theaccessibleteam/env-doctor
 ```
 
   </TabItem>

@@ -9,13 +9,13 @@ Use env-doctor programmatically in your Node.js applications.
 ## Installation
 
 ```bash
-npm install env-doctor
+npm install @theaccessibleteam/env-doctor
 ```
 
 ## Quick Start
 
 ```typescript
-import { analyze, loadConfig } from 'env-doctor';
+import { analyze, loadConfig } from '@theaccessibleteam/env-doctor';
 
 const { config } = await loadConfig();
 const result = await analyze({ config });
@@ -32,7 +32,7 @@ console.log(`Found ${result.issues.length} issues`);
 Main analysis function that orchestrates all scanners and analyzers.
 
 ```typescript
-import { analyze } from 'env-doctor';
+import { analyze } from '@theaccessibleteam/env-doctor';
 
 const result = await analyze({
   config: {
@@ -73,7 +73,7 @@ interface AnalysisResult {
 Load configuration from file or use defaults.
 
 ```typescript
-import { loadConfig } from 'env-doctor';
+import { loadConfig } from '@theaccessibleteam/env-doctor';
 
 // Load from default locations
 const { config, configPath } = await loadConfig();
@@ -103,7 +103,7 @@ const { config } = await loadConfig(undefined, '/path/to/project');
 Parse a single `.env` file.
 
 ```typescript
-import { parseEnvFile } from 'env-doctor';
+import { parseEnvFile } from '@theaccessibleteam/env-doctor';
 
 const result = await parseEnvFile('.env', process.cwd());
 
@@ -136,7 +136,7 @@ interface EnvVariable {
 Scan source files for `process.env` usage.
 
 ```typescript
-import { scanCode } from 'env-doctor';
+import { scanCode } from '@theaccessibleteam/env-doctor';
 
 const result = await scanCode({
   rootDir: process.cwd(),
@@ -175,7 +175,7 @@ interface EnvUsage {
 Scan git history for leaked secrets.
 
 ```typescript
-import { scanGitHistory } from 'env-doctor';
+import { scanGitHistory } from '@theaccessibleteam/env-doctor';
 
 const { results, error } = await scanGitHistory({
   rootDir: process.cwd(),
@@ -196,7 +196,7 @@ if (results.length > 0) {
 Find variables used but not defined.
 
 ```typescript
-import { analyzeMissing } from 'env-doctor';
+import { analyzeMissing } from '@theaccessibleteam/env-doctor';
 
 const issues = analyzeMissing({
   definedVariables: envVars,
@@ -210,7 +210,7 @@ const issues = analyzeMissing({
 Find variables defined but not used.
 
 ```typescript
-import { analyzeUnused } from 'env-doctor';
+import { analyzeUnused } from '@theaccessibleteam/env-doctor';
 
 const issues = analyzeUnused({
   definedVariables: envVars,
@@ -225,7 +225,7 @@ const issues = analyzeUnused({
 Find type mismatches between usage and values.
 
 ```typescript
-import { analyzeTypeMismatch } from 'env-doctor';
+import { analyzeTypeMismatch } from '@theaccessibleteam/env-doctor';
 
 const issues = analyzeTypeMismatch({
   definedVariables: envVars,
@@ -239,7 +239,7 @@ const issues = analyzeTypeMismatch({
 Detect exposed secrets.
 
 ```typescript
-import { analyzeSecrets } from 'env-doctor';
+import { analyzeSecrets } from '@theaccessibleteam/env-doctor';
 
 const issues = analyzeSecrets({
   variables: envVars,
@@ -253,7 +253,7 @@ const issues = analyzeSecrets({
 Check sync between env and template files.
 
 ```typescript
-import { analyzeSyncDrift } from 'env-doctor';
+import { analyzeSyncDrift } from '@theaccessibleteam/env-doctor';
 
 const result = analyzeSyncDrift({
   envVariables: envVars,
@@ -273,7 +273,7 @@ console.log(`In sync: ${result.inSync}`);
 Output results to console with formatting.
 
 ```typescript
-import { analyze, reportToConsole } from 'env-doctor';
+import { analyze, reportToConsole } from '@theaccessibleteam/env-doctor';
 
 const result = await analyze({ config });
 reportToConsole(result, { verbose: true });
@@ -284,7 +284,7 @@ reportToConsole(result, { verbose: true });
 Get results as formatted JSON string.
 
 ```typescript
-import { analyze, reportToJSON } from 'env-doctor';
+import { analyze, reportToJSON } from '@theaccessibleteam/env-doctor';
 
 const result = await analyze({ config });
 const json = reportToJSON(result);
@@ -296,7 +296,7 @@ fs.writeFileSync('report.json', json);
 Get results in SARIF format for GitHub.
 
 ```typescript
-import { analyze, reportToSARIF } from 'env-doctor';
+import { analyze, reportToSARIF } from '@theaccessibleteam/env-doctor';
 
 const result = await analyze({ config });
 const sarif = reportToSARIF(result);
@@ -312,7 +312,7 @@ fs.writeFileSync('results.sarif', sarif);
 Auto-detect the framework used.
 
 ```typescript
-import { detectFramework } from 'env-doctor';
+import { detectFramework } from '@theaccessibleteam/env-doctor';
 
 const framework = await detectFramework(process.cwd());
 // Returns: 'nextjs' | 'vite' | 'cra' | 'node'
@@ -323,7 +323,7 @@ const framework = await detectFramework(process.cwd());
 Get detailed framework information.
 
 ```typescript
-import { getFrameworkInfo } from 'env-doctor';
+import { getFrameworkInfo } from '@theaccessibleteam/env-doctor';
 
 const info = getFrameworkInfo('nextjs');
 // {

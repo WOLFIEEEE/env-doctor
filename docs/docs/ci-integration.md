@@ -35,7 +35,7 @@ jobs:
         run: npm ci
         
       - name: Check environment variables
-        run: npx env-doctor --ci
+        run: npx @theaccessibleteam/env-doctor --ci
 ```
 
 ### With SARIF Upload
@@ -66,7 +66,7 @@ jobs:
           node-version: '20'
           
       - name: Run env-doctor
-        run: npx env-doctor --ci --format sarif > results.sarif
+        run: npx @theaccessibleteam/env-doctor --ci --format sarif > results.sarif
         continue-on-error: true
         
       - name: Upload SARIF
@@ -81,7 +81,7 @@ Save reports as build artifacts:
 
 ```yaml
 - name: Run env-doctor
-  run: npx env-doctor --format json > env-report.json
+  run: npx @theaccessibleteam/env-doctor --format json > env-report.json
   
 - name: Upload report
   uses: actions/upload-artifact@v4
@@ -101,7 +101,7 @@ env-check:
   stage: test
   script:
     - npm ci
-    - npx env-doctor --ci
+    - npx @theaccessibleteam/env-doctor --ci
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -115,7 +115,7 @@ env-check:
   stage: test
   script:
     - npm ci
-    - npx env-doctor --format json > env-report.json
+    - npx @theaccessibleteam/env-doctor --format json > env-report.json
   artifacts:
     reports:
       dotenv: env-report.json
@@ -142,7 +142,7 @@ jobs:
           command: npm ci
       - run:
           name: Check environment variables
-          command: npx env-doctor --ci
+          command: npx @theaccessibleteam/env-doctor --ci
 
 workflows:
   main:
@@ -170,7 +170,7 @@ steps:
   - script: npm ci
     displayName: 'Install dependencies'
     
-  - script: npx env-doctor --ci
+  - script: npx @theaccessibleteam/env-doctor --ci
     displayName: 'Check environment variables'
 ```
 
@@ -192,7 +192,7 @@ pipeline {
         
         stage('Environment Check') {
             steps {
-                sh 'npx env-doctor --ci'
+                sh 'npx @theaccessibleteam/env-doctor --ci'
             }
         }
     }
@@ -210,7 +210,7 @@ Run env-doctor before each commit:
 ```bash
 npm install -D husky
 npx husky init
-echo "npx env-doctor --ci" > .husky/pre-commit
+echo "npx @theaccessibleteam/env-doctor --ci" > .husky/pre-commit
 ```
 
 ### Using lint-staged
@@ -219,7 +219,7 @@ echo "npx env-doctor --ci" > .husky/pre-commit
 {
   "lint-staged": {
     "*.{ts,js,tsx,jsx}": [
-      "npx env-doctor --ci"
+      "npx @theaccessibleteam/env-doctor --ci"
     ]
   }
 }
@@ -247,7 +247,7 @@ steps:
       echo "API_KEY=${{ secrets.API_KEY }}" >> .env
       
   - name: Validate environment
-    run: npx env-doctor --ci
+    run: npx @theaccessibleteam/env-doctor --ci
 ```
 
 ### Git History Scanning in CI
@@ -256,7 +256,7 @@ Check for leaked secrets in git history:
 
 ```yaml
 - name: Scan git history
-  run: npx env-doctor scan-history --depth 50
+  run: npx @theaccessibleteam/env-doctor scan-history --depth 50
 ```
 
 ---
@@ -271,7 +271,7 @@ Check for leaked secrets in git history:
 Use `--strict` to treat warnings as errors:
 
 ```yaml
-- run: npx env-doctor --ci --strict
+- run: npx @theaccessibleteam/env-doctor --ci --strict
 ```
 
 ---

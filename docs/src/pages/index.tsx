@@ -33,7 +33,7 @@ function HomepageHeader() {
             </Link>
           </div>
           <div className={styles.installCommand}>
-            <code>npx env-doctor</code>
+            <code>npx @theaccessibleteam/env-doctor</code>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ function TerminalDemo() {
         <span className={clsx(styles.terminalDot, styles.green)}></span>
       </div>
       <div className={styles.terminalContent}>
-        <pre>{`$ npx env-doctor
+        <pre>{`$ npx @theaccessibleteam/env-doctor
 
 env-doctor v1.0.0
 
@@ -187,7 +187,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - run: npx env-doctor --ci --format sarif > results.sarif
+      - run: npx @theaccessibleteam/env-doctor --ci --format sarif > results.sarif
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif`}</pre>
