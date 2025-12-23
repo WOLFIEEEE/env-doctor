@@ -3,6 +3,7 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
+import TerminalDemo from '@site/src/components/TerminalDemo';
 
 import styles from './index.module.css';
 
@@ -77,46 +78,6 @@ function FeatureCard({title, description}: {title: string; description: string})
   );
 }
 
-function TerminalDemo() {
-  return (
-    <div className={styles.terminalDemo}>
-      <div className={styles.terminalHeader}>
-        <span className={clsx(styles.terminalDot, styles.red)}></span>
-        <span className={clsx(styles.terminalDot, styles.yellow)}></span>
-        <span className={clsx(styles.terminalDot, styles.green)}></span>
-      </div>
-      <div className={styles.terminalContent}>
-        <pre>{`$ npx @theaccessibleteam/env-doctor
-
-env-doctor v1.0.0
-
-Framework: nextjs
-Scanned 42 files, 12 env variables
-
-✗ Missing Variables (2 issues)
-
-  DATABASE_URL
-    Variable "DATABASE_URL" is used in code but not defined
-    at src/lib/db.ts:5
-
-  API_SECRET
-    Required variable is not defined
-
-⚠ Unused Variables (1 issue)
-
-  OLD_API_KEY
-    Defined in .env but never used
-
-✓ Sync Check
-  .env and .env.example are in sync
-
-Summary: 2 errors, 1 warning
-Completed in 156ms`}</pre>
-      </div>
-    </div>
-  );
-}
-
 function FeaturesSection() {
   return (
     <section className={styles.features}>
@@ -139,27 +100,38 @@ function DemoSection() {
   return (
     <section className={styles.demoSection}>
       <div className="container">
-        <div className={styles.demoGrid}>
-          <div className={styles.demoText}>
-            <Heading as="h2">See It In Action</Heading>
-            <p>
-              Run a single command to analyze your entire codebase. Get instant feedback 
-              on missing variables, exposed secrets, and configuration issues.
-            </p>
-            <ul className={styles.demoFeatures}>
-              <li>✓ AST-based scanning for accurate detection</li>
-              <li>✓ Framework-aware (Next.js, Vite, CRA)</li>
-              <li>✓ SARIF output for GitHub Code Scanning</li>
-              <li>✓ Interactive fix mode</li>
-            </ul>
+        <div className={styles.sectionHeader}>
+          <Heading as="h2">See It In Action</Heading>
+          <p>Try different scenarios to see how env-doctor catches issues</p>
+        </div>
+        <div className={styles.demoContainer}>
+          <TerminalDemo />
+        </div>
+        <div className={styles.demoDescription}>
+          <div className={styles.demoFeatureGrid}>
+            <div className={styles.demoFeatureItem}>
+              <span className={styles.demoFeatureIcon}>🔍</span>
+              <span>AST-based scanning for accurate detection</span>
+            </div>
+            <div className={styles.demoFeatureItem}>
+              <span className={styles.demoFeatureIcon}>⚡</span>
+              <span>Framework-aware (Next.js, Vite, CRA)</span>
+            </div>
+            <div className={styles.demoFeatureItem}>
+              <span className={styles.demoFeatureIcon}>📊</span>
+              <span>SARIF output for GitHub Code Scanning</span>
+            </div>
+            <div className={styles.demoFeatureItem}>
+              <span className={styles.demoFeatureIcon}>🛠️</span>
+              <span>Interactive fix mode</span>
+            </div>
+          </div>
+          <div className={styles.demoCTA}>
             <Link
               className="button button--primary button--lg"
               to="/docs/getting-started/quick-start">
-              Quick Start Guide
+              Quick Start Guide →
             </Link>
-          </div>
-          <div className={styles.demoTerminal}>
-            <TerminalDemo />
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import styles from './styles.module.css';
 interface DemoScenario {
   id: string;
   title: string;
+  icon: string;
   command: string;
   output: string;
 }
@@ -12,7 +13,8 @@ const scenarios: DemoScenario[] = [
   {
     id: 'missing',
     title: 'Missing Variables',
-    command: 'npx env-doctor',
+    icon: '🔍',
+    command: 'npx @theaccessibleteam/env-doctor',
     output: `env-doctor v1.0.0
 
 Framework: nextjs
@@ -33,7 +35,8 @@ Completed in 124ms`
   {
     id: 'unused',
     title: 'Unused Variables',
-    command: 'npx env-doctor',
+    icon: '🧹',
+    command: 'npx @theaccessibleteam/env-doctor',
     output: `env-doctor v1.0.0
 
 Framework: node
@@ -59,7 +62,8 @@ Completed in 89ms`
   {
     id: 'secrets',
     title: 'Secret Detection',
-    command: 'npx env-doctor',
+    icon: '🔐',
+    command: 'npx @theaccessibleteam/env-doctor',
     output: `env-doctor v1.0.0
 
 Framework: node
@@ -84,7 +88,8 @@ Completed in 67ms`
   {
     id: 'clean',
     title: 'All Checks Pass',
-    command: 'npx env-doctor',
+    icon: '✅',
+    command: 'npx @theaccessibleteam/env-doctor',
     output: `env-doctor v1.0.0
 
 Framework: nextjs
@@ -109,8 +114,17 @@ Completed in 156ms`
 
 export default function TerminalDemo(): JSX.Element {
   const [activeScenario, setActiveScenario] = useState(scenarios[0].id);
+  const [isTyping, setIsTyping] = useState(false);
   
   const currentScenario = scenarios.find(s => s.id === activeScenario) || scenarios[0];
+
+  const handleScenarioChange = (scenarioId: string) => {
+    if (scenarioId !== activeScenario) {
+      setIsTyping(true);
+      setActiveScenario(scenarioId);
+      setTimeout(() => setIsTyping(false), 300);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -119,21 +133,26 @@ export default function TerminalDemo(): JSX.Element {
           <button
             key={scenario.id}
             className={`${styles.tab} ${activeScenario === scenario.id ? styles.active : ''}`}
-            onClick={() => setActiveScenario(scenario.id)}
+            onClick={() => handleScenarioChange(scenario.id)}
+            aria-pressed={activeScenario === scenario.id}
           >
-            {scenario.title}
+            <span className={styles.tabIcon}>{scenario.icon}</span>
+            <span className={styles.tabText}>{scenario.title}</span>
           </button>
         ))}
       </div>
       
       <div className={styles.terminal}>
         <div className={styles.header}>
-          <span className={`${styles.dot} ${styles.red}`}></span>
-          <span className={`${styles.dot} ${styles.yellow}`}></span>
-          <span className={`${styles.dot} ${styles.green}`}></span>
-          <span className={styles.title}>Terminal</span>
+          <div className={styles.dots}>
+            <span className={`${styles.dot} ${styles.red}`}></span>
+            <span className={`${styles.dot} ${styles.yellow}`}></span>
+            <span className={`${styles.dot} ${styles.green}`}></span>
+          </div>
+          <span className={styles.title}>env-doctor demo</span>
+          <div className={styles.headerSpacer}></div>
         </div>
-        <div className={styles.content}>
+        <div className={`${styles.content} ${isTyping ? styles.fadeIn : ''}`}>
           <div className={styles.command}>
             <span className={styles.prompt}>$</span> {currentScenario.command}
           </div>
