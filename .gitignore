@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+.DS_Store?
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files (for testing)
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+
+# Docusaurus build
+docs/build/
+docs/.docusaurus/
+
+# Generated icons (keep SVG, ignore generated PNG/ICO)
+docs/static/img/*.png
+docs/static/img/*.ico
+!docs/static/img/undraw_*.svg
+!docs/static/img/*.svg
+
+# Changeset
+.changeset/*.md
+!.changeset/README.md
+!.changeset/config.json
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
