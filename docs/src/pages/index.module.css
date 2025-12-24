@@ -718,6 +718,7 @@
 .vscodeMockupContent {
   position: relative;
   padding: 1rem;
+  background: #1e1e1e;
 }
 
 .vscodeMockupCode {
@@ -725,9 +726,12 @@
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   font-size: 0.8rem;
   line-height: 1.6;
-  color: #d4d4d4;
+  color: #ffffff;
+  background: #000000;
   white-space: pre;
   overflow-x: auto;
+  padding: 1rem;
+  border-radius: 4px;
 }
 
 .vscodeMockupCode code {
@@ -735,8 +739,8 @@
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  color: inherit;
-  background: transparent;
+  color: #ffffff;
+  background: #000000;
   padding: 0;
   margin: 0;
   white-space: pre;
