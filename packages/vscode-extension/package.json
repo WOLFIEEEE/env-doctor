@@ -1,18 +1,29 @@
 {
   "name": "env-doctor-vscode",
   "displayName": "env-doctor",
-  "description": "Real-time environment variable validation and intellisense",
+  "description": "Real-time environment variable validation, intellisense, and diagnostics for your codebase",
   "version": "1.0.0",
   "publisher": "theaccessibleteam",
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#0A0A0B",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/WOLFIEEEE/env-doctor.git"
   },
+  "bugs": {
+    "url": "https://github.com/WOLFIEEEE/env-doctor/issues"
+  },
+  "homepage": "https://env-doctor.dev",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Linters",
+    "Programming Languages",
     "Other"
   ],
   "keywords": [
@@ -20,11 +31,19 @@
     "environment",
     "dotenv",
     "validation",
-    "typescript"
+    "typescript",
+    "javascript",
+    "next.js",
+    "vite",
+    "react"
   ],
   "activationEvents": [
     "workspaceContains:**/.env*",
-    "workspaceContains:**/env-doctor.config.*"
+    "workspaceContains:**/env-doctor.config.*",
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -34,7 +53,7 @@
         "envDoctor.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Enable env-doctor diagnostics"
+          "description": "Enable env-doctor diagnostics and features"
         },
         "envDoctor.configPath": {
           "type": "string",
@@ -47,7 +66,12 @@
             "type": "string"
           },
           "default": [".env", ".env.local", ".env.development"],
-          "description": "Environment files to watch"
+          "description": "Environment files to watch and analyze"
+        },
+        "envDoctor.diagnostics.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable real-time diagnostics"
         },
         "envDoctor.diagnostics.showUnused": {
           "type": "boolean",
@@ -62,32 +86,60 @@
         "envDoctor.diagnostics.showSecrets": {
           "type": "boolean",
           "default": true,
-          "description": "Show warnings for exposed secrets"
+          "description": "Show errors for exposed secrets in client code"
+        },
+        "envDoctor.diagnostics.severity.missing": {
+          "type": "string",
+          "enum": ["error", "warning", "information", "hint"],
+          "default": "warning",
+          "description": "Severity level for missing variable diagnostics"
+        },
+        "envDoctor.diagnostics.severity.unused": {
+          "type": "string",
+          "enum": ["error", "warning", "information", "hint"],
+          "default": "hint",
+          "description": "Severity level for unused variable diagnostics"
+        },
+        "envDoctor.diagnostics.severity.secret": {
+          "type": "string",
+          "enum": ["error", "warning", "information", "hint"],
+          "default": "error",
+          "description": "Severity level for exposed secret diagnostics"
+        },
+        "envDoctor.autocomplete.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable autocomplete for environment variables"
         },
         "envDoctor.autocomplete.showValues": {
           "type": "boolean",
           "default": true,
-          "description": "Show variable values in autocomplete"
+          "description": "Show variable values in autocomplete suggestions"
         },
         "envDoctor.autocomplete.redactSecrets": {
           "type": "boolean",
           "default": true,
-          "description": "Redact secret values in autocomplete"
+          "description": "Hide secret values in autocomplete suggestions"
         },
-        "envDoctor.codeLens.enable": {
+        "envDoctor.hover.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Enable CodeLens for .env files"
+          "description": "Enable hover information for environment variables"
         },
         "envDoctor.hover.showUsages": {
           "type": "boolean",
           "default": true,
-          "description": "Show usage locations in hover"
+          "description": "Show usage locations in hover tooltips"
         },
         "envDoctor.hover.maxUsages": {
           "type": "number",
           "default": 5,
-          "description": "Maximum number of usages to show in hover"
+          "description": "Maximum number of usage locations to show in hover"
+        },
+        "envDoctor.statusBar.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show env-doctor status in the status bar"
         }
       }
     },
@@ -95,47 +147,121 @@
       {
         "command": "env-doctor.analyze",
         "title": "Analyze Environment Variables",
-        "category": "env-doctor"
+        "category": "env-doctor",
+        "icon": "$(search)"
       },
       {
         "command": "env-doctor.addToEnv",
         "title": "Add Variable to .env",
+        "category": "env-doctor",
+        "icon": "$(add)"
+      },
+      {
+        "command": "env-doctor.removeFromEnv",
+        "title": "Remove Variable from .env",
+        "category": "env-doctor",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "env-doctor.addToEnvExample",
+        "title": "Add Variable to .env.example",
         "category": "env-doctor"
       },
       {
-        "command": "env-doctor.syncTemplate",
+        "command": "env-doctor.sync",
         "title": "Sync .env.example",
-        "category": "env-doctor"
+        "category": "env-doctor",
+        "icon": "$(sync)"
       },
       {
         "command": "env-doctor.showMatrix",
         "title": "Show Environment Matrix",
-        "category": "env-doctor"
+        "category": "env-doctor",
+        "icon": "$(table)"
+      },
+      {
+        "command": "env-doctor.generateSchema",
+        "title": "Generate TypeScript Schema",
+        "category": "env-doctor",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "env-doctor.refresh",
+        "title": "Refresh Analysis",
+        "category": "env-doctor",
+        "icon": "$(refresh)"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "env-doctor.analyze",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "env-doctor.sync",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "env-doctor.showMatrix",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "env-doctor.generateSchema",
+          "when": "workspaceFolderCount > 0"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "env-doctor.addToEnv",
+          "group": "env-doctor",
+          "when": "editorTextFocus && resourceLangId =~ /typescript|javascript|typescriptreact|javascriptreact/"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "dotenv",
-        "aliases": ["Environment Variables", "dotenv"],
+        "aliases": ["Environment Variables", "dotenv", "env"],
         "extensions": [".env"],
-        "filenames": [".env", ".env.local", ".env.development", ".env.production", ".env.test", ".env.example"]
+        "filenames": [
+          ".env",
+          ".env.local",
+          ".env.development",
+          ".env.production",
+          ".env.test",
+          ".env.staging",
+          ".env.example",
+          ".env.sample"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dotenv",
+        "scopeName": "source.env",
+        "path": "./syntaxes/dotenv.tmLanguage.json"
       }
     ]
   },
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
-    "watch": "npm run build -- --watch",
-    "package": "vsce package",
-    "publish": "vsce publish"
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "lint": "eslint src --ext ts",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
   },
   "devDependencies": {
+    "@types/node": "^20.10.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^2.22.0",
     "esbuild": "^0.19.0",
     "typescript": "^5.3.0"
   },
   "dependencies": {
-    "@theaccessibleteam/env-doctor": "workspace:*"
+    "vscode-languageclient": "^9.0.1"
   }
 }
-

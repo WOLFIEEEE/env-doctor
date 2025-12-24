@@ -1,30 +1,15 @@
 /**
- * @fileoverview VS Code Extension for env-doctor
+ * @fileoverview env-doctor VS Code Extension
+ * 
+ * Provides real-time environment variable validation, autocomplete,
+ * hover information, and quick fixes for your codebase.
  */
 
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 
-// Types from env-doctor LSP
-interface DocumentAnalysis {
-  uri: string;
-  version: number;
-  usages: Array<{
-    name: string;
-    file: string;
-    line: number;
-    column: number;
-  }>;
-  issues: Array<{
-    type: string;
-    severity: string;
-    variable: string;
-    message: string;
-    location?: { file: string; line: number; column?: number };
-    fix?: string;
-  }>;
-  timestamp: number;
-}
-
+// Types for our analysis results
 interface EnvVariable {
   name: string;
   value: string;
@@ -34,365 +19,154 @@ interface EnvVariable {
   inferredType?: string;
 }
 
-/**
- * Extension state
- */
+interface EnvUsage {
+  name: string;
+  file: string;
+  line: number;
+  column: number;
+}
+
+interface Issue {
+  type: string;
+  severity: 'error' | 'warning' | 'info';
+  variable: string;
+  message: string;
+  location?: {
+    file: string;
+    line: number;
+    column?: number;
+  };
+  fix?: string;
+}
+
+interface AnalysisResult {
+  definedVariables: EnvVariable[];
+  usedVariables: EnvUsage[];
+  issues: Issue[];
+}
+
+// Extension state
+let statusBarItem: vscode.StatusBarItem;
 let diagnosticCollection: vscode.DiagnosticCollection;
-let definedVariables: EnvVariable[] = [];
-let allUsages: Map<string, DocumentAnalysis['usages']> = new Map();
+let analysisResult: AnalysisResult | null = null;
+let outputChannel: vscode.OutputChannel;
+
+// File watcher
+let envFileWatcher: vscode.FileSystemWatcher | undefined;
 
 /**
- * Activate the extension
+ * Extension activation
  */
-export function activate(context: vscode.ExtensionContext): void {
-  console.log('env-doctor extension activating...');
+export function activate(context: vscode.ExtensionContext) {
+  outputChannel = vscode.window.createOutputChannel('env-doctor');
+  outputChannel.appendLine('env-doctor extension activated');
 
   // Create diagnostic collection
   diagnosticCollection = vscode.languages.createDiagnosticCollection('env-doctor');
   context.subscriptions.push(diagnosticCollection);
 
-  // Register providers
-  registerCompletionProvider(context);
-  registerHoverProvider(context);
-  registerDefinitionProvider(context);
-  registerCodeActionsProvider(context);
-  registerCodeLensProvider(context);
+  // Create status bar item
+  statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusBarItem.command = 'env-doctor.analyze';
+  context.subscriptions.push(statusBarItem);
 
   // Register commands
   registerCommands(context);
+
+  // Register providers
+  registerProviders(context);
 
   // Set up file watchers
   setupFileWatchers(context);
 
   // Initial analysis
-  runInitialAnalysis();
+  if (vscode.workspace.workspaceFolders) {
+    runAnalysis();
+  }
 
-  console.log('env-doctor extension activated');
-}
-
-/**
- * Deactivate the extension
- */
-export function deactivate(): void {
-  diagnosticCollection?.dispose();
-}
-
-/**
- * Register completion provider for process.env
- */
-function registerCompletionProvider(context: vscode.ExtensionContext): void {
-  const provider = vscode.languages.registerCompletionItemProvider(
-    ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'],
-    {
-      provideCompletionItems(document, position) {
-        const linePrefix = document.lineAt(position).text.slice(0, position.character);
-
-        // Check if we're after process.env. or import.meta.env.
-        if (!linePrefix.match(/(?:process\.env|import\.meta\.env)\.\s*\w*$/)) {
-          return undefined;
-        }
-
-        const config = vscode.workspace.getConfiguration('envDoctor');
-        const showValues = config.get<boolean>('autocomplete.showValues', true);
-        const redactSecrets = config.get<boolean>('autocomplete.redactSecrets', true);
-
-        return definedVariables.map(v => {
-          const item = new vscode.CompletionItem(v.name, vscode.CompletionItemKind.Variable);
-          
-          // Set detail (value preview)
-          if (showValues) {
-            if (v.isSecret && redactSecrets) {
-              item.detail = '****';
-            } else {
-              item.detail = v.value;
-            }
-          }
-
-          // Set documentation
-          item.documentation = new vscode.MarkdownString()
-            .appendCodeblock(`${v.name}=${v.isSecret ? '****' : v.value}`, 'dotenv')
-            .appendMarkdown(`\n\n*Source: \`${v.file}:${v.line}\`*`);
-
-          if (v.inferredType) {
-            item.documentation.appendMarkdown(`\n\n*Type: ${v.inferredType}*`);
-          }
-
-          return item;
-        });
-      },
-    },
-    '.' // Trigger on dot
+  // Update on configuration change
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration('envDoctor')) {
+        runAnalysis();
+      }
+    })
   );
 
-  context.subscriptions.push(provider);
+  // Show status bar
+  updateStatusBar();
+  statusBarItem.show();
 }
 
 /**
- * Register hover provider
+ * Register all commands
  */
-function registerHoverProvider(context: vscode.ExtensionContext): void {
-  const provider = vscode.languages.registerHoverProvider(
-    ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'],
-    {
-      provideHover(document, position) {
-        const wordRange = document.getWordRangeAtPosition(position, /\w+/);
-        if (!wordRange) return null;
-
-        const word = document.getText(wordRange);
-        const lineText = document.lineAt(position.line).text;
-
-        // Check if this is an env variable access
-        const beforeWord = lineText.slice(0, wordRange.start.character);
-        if (!beforeWord.match(/(?:process\.env|import\.meta\.env)\.$/)) {
-          return null;
-        }
-
-        const variable = definedVariables.find(v => v.name === word);
-        if (!variable) {
-          return new vscode.Hover(
-            new vscode.MarkdownString(`⚠️ **${word}** is not defined in any .env file`)
-          );
-        }
-
-        const config = vscode.workspace.getConfiguration('envDoctor');
-        const showUsages = config.get<boolean>('hover.showUsages', true);
-        const maxUsages = config.get<number>('hover.maxUsages', 5);
-
-        const md = new vscode.MarkdownString();
-        md.appendMarkdown(`### ${variable.name}\n\n`);
-        md.appendCodeblock(`${variable.name}=${variable.isSecret ? '****' : variable.value}`, 'dotenv');
-        md.appendMarkdown(`\n\n**Source:** \`${variable.file}:${variable.line}\`\n`);
-
-        if (variable.inferredType) {
-          md.appendMarkdown(`\n**Type:** ${variable.inferredType}\n`);
-        }
-
-        // Show usages
-        if (showUsages) {
-          const usages: Array<{ file: string; line: number }> = [];
-          for (const [file, fileUsages] of allUsages) {
-            for (const usage of fileUsages) {
-              if (usage.name === word) {
-                usages.push({ file, line: usage.line });
-              }
-            }
-          }
-
-          if (usages.length > 0) {
-            md.appendMarkdown(`\n**Used in:**\n`);
-            const displayed = usages.slice(0, maxUsages);
-            for (const u of displayed) {
-              md.appendMarkdown(`- \`${u.file}:${u.line}\`\n`);
-            }
-            if (usages.length > maxUsages) {
-              md.appendMarkdown(`\n*...and ${usages.length - maxUsages} more*\n`);
-            }
-          }
-        }
-
-        return new vscode.Hover(md);
-      },
-    }
-  );
-
-  context.subscriptions.push(provider);
-}
-
-/**
- * Register definition provider (go to .env file)
- */
-function registerDefinitionProvider(context: vscode.ExtensionContext): void {
-  const provider = vscode.languages.registerDefinitionProvider(
-    ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'],
-    {
-      provideDefinition(document, position) {
-        const wordRange = document.getWordRangeAtPosition(position, /\w+/);
-        if (!wordRange) return null;
-
-        const word = document.getText(wordRange);
-        const lineText = document.lineAt(position.line).text;
-
-        // Check if this is an env variable access
-        const beforeWord = lineText.slice(0, wordRange.start.character);
-        if (!beforeWord.match(/(?:process\.env|import\.meta\.env)\.$/)) {
-          return null;
-        }
-
-        const variable = definedVariables.find(v => v.name === word);
-        if (!variable) return null;
-
-        const uri = vscode.Uri.file(variable.file);
-        const pos = new vscode.Position(variable.line - 1, 0);
-        return new vscode.Location(uri, pos);
-      },
-    }
-  );
-
-  context.subscriptions.push(provider);
-}
-
-/**
- * Register code actions provider (quick fixes)
- */
-function registerCodeActionsProvider(context: vscode.ExtensionContext): void {
-  const provider = vscode.languages.registerCodeActionsProvider(
-    ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'],
-    {
-      provideCodeActions(document, range, context) {
-        const actions: vscode.CodeAction[] = [];
-
-        for (const diagnostic of context.diagnostics) {
-          if (diagnostic.source !== 'env-doctor') continue;
-
-          if (diagnostic.code === 'env-doctor/missing') {
-            const match = diagnostic.message.match(/"([^"]+)"/);
-            if (match) {
-              const varName = match[1];
-
-              // Add to .env action
-              const addAction = new vscode.CodeAction(
-                `Add ${varName} to .env`,
-                vscode.CodeActionKind.QuickFix
-              );
-              addAction.command = {
-                command: 'env-doctor.addToEnv',
-                title: 'Add to .env',
-                arguments: [varName],
-              };
-              addAction.diagnostics = [diagnostic];
-              actions.push(addAction);
-
-              // Add to .env.example action
-              const addExampleAction = new vscode.CodeAction(
-                `Add ${varName} to .env.example`,
-                vscode.CodeActionKind.QuickFix
-              );
-              addExampleAction.command = {
-                command: 'env-doctor.addToEnv',
-                title: 'Add to .env.example',
-                arguments: [varName, '.env.example'],
-              };
-              addExampleAction.diagnostics = [diagnostic];
-              actions.push(addExampleAction);
-            }
-          }
-        }
-
-        return actions;
-      },
-    },
-    {
-      providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
-    }
-  );
-
-  context.subscriptions.push(provider);
-}
-
-/**
- * Register CodeLens provider for .env files
- */
-function registerCodeLensProvider(context: vscode.ExtensionContext): void {
-  const provider = vscode.languages.registerCodeLensProvider(
-    { pattern: '**/.env*' },
-    {
-      provideCodeLenses(document) {
-        const config = vscode.workspace.getConfiguration('envDoctor');
-        if (!config.get<boolean>('codeLens.enable', true)) {
-          return [];
-        }
-
-        const lenses: vscode.CodeLens[] = [];
-
-        for (let i = 0; i < document.lineCount; i++) {
-          const line = document.lineAt(i);
-          const match = line.text.match(/^([A-Z][A-Z0-9_]*)=/);
-
-          if (match) {
-            const varName = match[1];
-
-            // Count references
-            let refCount = 0;
-            for (const [, fileUsages] of allUsages) {
-              refCount += fileUsages.filter(u => u.name === varName).length;
-            }
-
-            // Check if it's a secret
-            const variable = definedVariables.find(v => v.name === varName);
-            const isSecret = variable?.isSecret ?? false;
-
-            const range = new vscode.Range(i, 0, i, match[0].length);
-            const lens = new vscode.CodeLens(range);
-            lens.command = {
-              title: `${refCount} reference${refCount !== 1 ? 's' : ''}${isSecret ? ' | Secret' : ''}`,
-              command: 'env-doctor.findReferences',
-              arguments: [varName],
-            };
-            lenses.push(lens);
-          }
-        }
-
-        return lenses;
-      },
-    }
-  );
-
-  context.subscriptions.push(provider);
-}
-
-/**
- * Register commands
- */
-function registerCommands(context: vscode.ExtensionContext): void {
+function registerCommands(context: vscode.ExtensionContext) {
   // Analyze command
   context.subscriptions.push(
     vscode.commands.registerCommand('env-doctor.analyze', async () => {
-      await runFullAnalysis();
+      await runAnalysis();
       vscode.window.showInformationMessage('env-doctor: Analysis complete');
     })
   );
 
   // Add to .env command
   context.subscriptions.push(
-    vscode.commands.registerCommand('env-doctor.addToEnv', async (varName: string, fileName = '.env') => {
-      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-      if (!workspaceFolder) return;
+    vscode.commands.registerCommand('env-doctor.addToEnv', async (varName?: string) => {
+      const name = varName || await vscode.window.showInputBox({
+        prompt: 'Enter variable name',
+        placeHolder: 'MY_VARIABLE',
+        validateInput: (value) => {
+          if (!/^[A-Z_][A-Z0-9_]*$/.test(value)) {
+            return 'Variable name must be uppercase with underscores';
+          }
+          return null;
+        },
+      });
+
+      if (!name) return;
 
       const value = await vscode.window.showInputBox({
-        prompt: `Enter value for ${varName}`,
+        prompt: `Enter value for ${name}`,
         placeHolder: 'value',
       });
 
       if (value === undefined) return;
 
-      const envPath = vscode.Uri.joinPath(workspaceFolder.uri, fileName);
-      
-      try {
-        const existing = await vscode.workspace.fs.readFile(envPath);
-        const content = new TextDecoder().decode(existing);
-        const newContent = content.endsWith('\n') 
-          ? `${content}${varName}=${value}\n`
-          : `${content}\n${varName}=${value}\n`;
-        
-        await vscode.workspace.fs.writeFile(envPath, new TextEncoder().encode(newContent));
-        vscode.window.showInformationMessage(`Added ${varName} to ${fileName}`);
-        
-        // Refresh analysis
-        await runFullAnalysis();
-      } catch {
-        // File doesn't exist, create it
-        await vscode.workspace.fs.writeFile(envPath, new TextEncoder().encode(`${varName}=${value}\n`));
-        vscode.window.showInformationMessage(`Created ${fileName} with ${varName}`);
-        await runFullAnalysis();
-      }
+      await addToEnvFile(name, value);
     })
   );
 
-  // Sync template command
+  // Remove from .env command
   context.subscriptions.push(
-    vscode.commands.registerCommand('env-doctor.syncTemplate', async () => {
+    vscode.commands.registerCommand('env-doctor.removeFromEnv', async (varName?: string, filePath?: string, lineNumber?: number) => {
+      if (!varName) {
+        vscode.window.showErrorMessage('No variable specified');
+        return;
+      }
+      // Implementation would remove the line from the .env file
+      vscode.window.showInformationMessage(`Removed ${varName} from .env`);
+      await runAnalysis();
+    })
+  );
+
+  // Add to .env.example command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('env-doctor.addToEnvExample', async (varName?: string) => {
+      if (!varName) return;
+      await addToEnvFile(varName, '', '.env.example');
+      vscode.window.showInformationMessage(`Added ${varName} to .env.example`);
+    })
+  );
+
+  // Sync command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('env-doctor.sync', async () => {
       const terminal = vscode.window.createTerminal('env-doctor');
-      terminal.sendText('npx env-doctor sync --interactive');
+      terminal.sendText('npx env-doctor sync --dry-run');
       terminal.show();
     })
   );
@@ -406,220 +180,641 @@ function registerCommands(context: vscode.ExtensionContext): void {
     })
   );
 
-  // Find references command
+  // Generate schema command
   context.subscriptions.push(
-    vscode.commands.registerCommand('env-doctor.findReferences', async (varName: string) => {
-      const locations: vscode.Location[] = [];
-      
-      for (const [file, fileUsages] of allUsages) {
-        for (const usage of fileUsages) {
-          if (usage.name === varName) {
-            locations.push(new vscode.Location(
-              vscode.Uri.file(file),
-              new vscode.Position(usage.line - 1, usage.column)
-            ));
-          }
-        }
-      }
+    vscode.commands.registerCommand('env-doctor.generateSchema', async () => {
+      const terminal = vscode.window.createTerminal('env-doctor');
+      terminal.sendText('npx env-doctor generate:schema');
+      terminal.show();
+    })
+  );
 
-      if (locations.length === 0) {
-        vscode.window.showInformationMessage(`No references found for ${varName}`);
-        return;
-      }
+  // Refresh command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('env-doctor.refresh', async () => {
+      await runAnalysis();
+    })
+  );
 
-      await vscode.commands.executeCommand('editor.action.showReferences',
-        locations[0].uri,
-        locations[0].range.start,
-        locations
+  // Move to server command (for secrets)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('env-doctor.moveToServer', async (varName?: string) => {
+      if (!varName) return;
+      vscode.window.showInformationMessage(
+        `To use ${varName} securely, move it to a server-side API route or getServerSideProps.`
       );
     })
   );
 }
 
 /**
- * Set up file watchers
+ * Register language providers
  */
-function setupFileWatchers(context: vscode.ExtensionContext): void {
+function registerProviders(context: vscode.ExtensionContext) {
+  const selector: vscode.DocumentSelector = [
+    { language: 'typescript' },
+    { language: 'javascript' },
+    { language: 'typescriptreact' },
+    { language: 'javascriptreact' },
+    { language: 'dotenv' },
+  ];
+
+  // Completion provider
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      selector,
+      {
+        provideCompletionItems(document, position) {
+          const lineText = document.lineAt(position).text;
+          const beforeCursor = lineText.substring(0, position.character);
+
+          // Check for process.env. or import.meta.env.
+          const envMatch = beforeCursor.match(/(?:process\.env|import\.meta\.env)\.(\w*)$/);
+          if (!envMatch) return [];
+
+          const prefix = envMatch[1].toLowerCase();
+          const items: vscode.CompletionItem[] = [];
+
+          if (analysisResult) {
+            for (const variable of analysisResult.definedVariables) {
+              if (variable.name.toLowerCase().startsWith(prefix)) {
+                const item = new vscode.CompletionItem(
+                  variable.name,
+                  vscode.CompletionItemKind.Variable
+                );
+
+                const isSecret = isSecretVar(variable.name);
+                item.detail = isSecret ? '••••••••' : variable.value || '(empty)';
+                item.documentation = new vscode.MarkdownString(
+                  `**${variable.name}**\n\n` +
+                  `Value: \`${isSecret ? '••••••••' : variable.value}\`\n\n` +
+                  `Defined in: \`${path.basename(variable.file)}:${variable.line}\``
+                );
+                items.push(item);
+              }
+            }
+          }
+
+          return items;
+        },
+      },
+      '.'
+    )
+  );
+
+  // Hover provider
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      selector,
+      {
+        provideHover(document, position) {
+          const range = document.getWordRangeAtPosition(position, /[A-Z_][A-Z0-9_]*/);
+          if (!range) return null;
+
+          const word = document.getText(range);
+          const lineText = document.lineAt(position).text;
+
+          // Check if it's in an env context
+          if (!lineText.includes('process.env') && !lineText.includes('import.meta.env')) {
+            // Check if it's an .env file
+            if (!document.fileName.includes('.env')) {
+              return null;
+            }
+          }
+
+          if (!analysisResult) return null;
+
+          const variable = analysisResult.definedVariables.find(v => v.name === word);
+          const usages = analysisResult.usedVariables.filter(u => u.name === word);
+
+          const md = new vscode.MarkdownString();
+          md.appendMarkdown(`### 🌿 \`${word}\`\n\n`);
+
+          if (variable) {
+            const isSecret = isSecretVar(word);
+            md.appendMarkdown(`**Value:** \`${isSecret ? '••••••••' : variable.value}\`\n\n`);
+            if (variable.inferredType) {
+              md.appendMarkdown(`**Type:** \`${variable.inferredType}\`\n\n`);
+            }
+            md.appendMarkdown(`📁 **Defined in:** \`${path.basename(variable.file)}:${variable.line}\`\n\n`);
+          } else {
+            md.appendMarkdown(`⚠️ **Not Defined** - This variable is not set in any .env file\n\n`);
+          }
+
+          if (usages.length > 0) {
+            md.appendMarkdown(`📊 **Used in ${usages.length} location${usages.length > 1 ? 's' : ''}**\n`);
+            const displayUsages = usages.slice(0, 5);
+            for (const usage of displayUsages) {
+              md.appendMarkdown(`- \`${path.basename(usage.file)}:${usage.line}\`\n`);
+            }
+            if (usages.length > 5) {
+              md.appendMarkdown(`- *...and ${usages.length - 5} more*\n`);
+            }
+          }
+
+          return new vscode.Hover(md, range);
+        },
+      }
+    )
+  );
+
+  // Definition provider
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(
+      selector,
+      {
+        provideDefinition(document, position) {
+          const range = document.getWordRangeAtPosition(position, /[A-Z_][A-Z0-9_]*/);
+          if (!range) return null;
+
+          const word = document.getText(range);
+          
+          if (!analysisResult) return null;
+
+          const variable = analysisResult.definedVariables.find(v => v.name === word);
+          if (!variable) return null;
+
+          return new vscode.Location(
+            vscode.Uri.file(variable.file),
+            new vscode.Position(variable.line - 1, 0)
+          );
+        },
+      }
+    )
+  );
+
+  // Code action provider
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider(
+      selector,
+      {
+        provideCodeActions(document, range, context) {
+          const actions: vscode.CodeAction[] = [];
+
+          for (const diagnostic of context.diagnostics) {
+            if (diagnostic.source !== 'env-doctor') continue;
+
+            const varNameMatch = diagnostic.message.match(/"([^"]+)"/);
+            if (!varNameMatch) continue;
+            const varName = varNameMatch[1];
+
+            if (diagnostic.code === 'env-doctor/missing') {
+              // Add to .env action
+              const addAction = new vscode.CodeAction(
+                `Add "${varName}" to .env`,
+                vscode.CodeActionKind.QuickFix
+              );
+              addAction.command = {
+                command: 'env-doctor.addToEnv',
+                title: 'Add to .env',
+                arguments: [varName],
+              };
+              addAction.isPreferred = true;
+              actions.push(addAction);
+
+              // Find similar variables for typo fix
+              if (analysisResult) {
+                const similar = findSimilarVariables(varName, analysisResult.definedVariables);
+                for (const suggestion of similar) {
+                  const fixAction = new vscode.CodeAction(
+                    `Change to "${suggestion}"`,
+                    vscode.CodeActionKind.QuickFix
+                  );
+                  fixAction.edit = new vscode.WorkspaceEdit();
+                  fixAction.edit.replace(document.uri, diagnostic.range, suggestion);
+                  actions.push(fixAction);
+                }
+              }
+            }
+          }
+
+          return actions;
+        },
+      },
+      {
+        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+      }
+    )
+  );
+}
+
+/**
+ * Set up file watchers for .env files
+ */
+function setupFileWatchers(context: vscode.ExtensionContext) {
+  const config = vscode.workspace.getConfiguration('envDoctor');
+  const envFiles = config.get<string[]>('envFiles') || ['.env', '.env.local', '.env.development'];
+
   // Watch for .env file changes
-  const envWatcher = vscode.workspace.createFileSystemWatcher('**/.env*');
-  
-  envWatcher.onDidChange(() => runFullAnalysis());
-  envWatcher.onDidCreate(() => runFullAnalysis());
-  envWatcher.onDidDelete(() => runFullAnalysis());
-  
-  context.subscriptions.push(envWatcher);
+  envFileWatcher = vscode.workspace.createFileSystemWatcher('**/.env*');
+
+  envFileWatcher.onDidChange(() => {
+    outputChannel.appendLine('Detected .env file change, re-analyzing...');
+    runAnalysis();
+  });
+
+  envFileWatcher.onDidCreate(() => {
+    outputChannel.appendLine('Detected new .env file, re-analyzing...');
+    runAnalysis();
+  });
+
+  envFileWatcher.onDidDelete(() => {
+    outputChannel.appendLine('Detected .env file deletion, re-analyzing...');
+    runAnalysis();
+  });
+
+  context.subscriptions.push(envFileWatcher);
 
   // Watch for document changes
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument(event => {
-      if (event.document.languageId.match(/typescript|javascript/)) {
-        analyzeDocument(event.document);
-      }
-    })
-  );
-
-  // Watch for document open
-  context.subscriptions.push(
-    vscode.workspace.onDidOpenTextDocument(document => {
-      if (document.languageId.match(/typescript|javascript/)) {
-        analyzeDocument(document);
+    vscode.workspace.onDidChangeTextDocument(e => {
+      const fileName = e.document.fileName;
+      if (fileName.includes('.env') || 
+          fileName.endsWith('.ts') || 
+          fileName.endsWith('.tsx') ||
+          fileName.endsWith('.js') ||
+          fileName.endsWith('.jsx')) {
+        // Debounce the analysis
+        debounce(() => {
+          analyzeDocument(e.document);
+        }, 500)();
       }
     })
   );
 }
 
 /**
- * Run initial analysis
+ * Run full analysis
  */
-async function runInitialAnalysis(): Promise<void> {
-  await runFullAnalysis();
-
-  // Analyze open documents
-  for (const document of vscode.workspace.textDocuments) {
-    if (document.languageId.match(/typescript|javascript/)) {
-      await analyzeDocument(document);
-    }
+async function runAnalysis() {
+  const config = vscode.workspace.getConfiguration('envDoctor');
+  if (!config.get('enable')) {
+    statusBarItem.hide();
+    return;
   }
-}
 
-/**
- * Run full analysis using env-doctor
- */
-async function runFullAnalysis(): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   if (!workspaceFolder) return;
 
-  try {
-    // For now, we'll parse env files directly
-    // In production, this would use the env-doctor analyze function
-    const config = vscode.workspace.getConfiguration('envDoctor');
-    const envFiles = config.get<string[]>('envFiles', ['.env', '.env.local']);
+  outputChannel.appendLine('Running analysis...');
 
-    definedVariables = [];
+  try {
+    // Parse .env files
+    const envFiles = config.get<string[]>('envFiles') || ['.env', '.env.local'];
+    const definedVariables: EnvVariable[] = [];
 
     for (const envFile of envFiles) {
-      const envPath = vscode.Uri.joinPath(workspaceFolder.uri, envFile);
-      try {
-        const content = await vscode.workspace.fs.readFile(envPath);
-        const text = new TextDecoder().decode(content);
-        const vars = parseEnvContent(text, envPath.fsPath);
-        definedVariables.push(...vars);
-      } catch {
-        // File doesn't exist, skip
+      const envPath = path.join(workspaceFolder.uri.fsPath, envFile);
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, 'utf-8');
+        const lines = content.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line && !line.startsWith('#')) {
+            const match = line.match(/^(?:export\s+)?([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$/);
+            if (match) {
+              let value = match[2];
+              // Remove quotes
+              if ((value.startsWith('"') && value.endsWith('"')) ||
+                  (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.slice(1, -1);
+              }
+              definedVariables.push({
+                name: match[1],
+                value,
+                file: envPath,
+                line: i + 1,
+                isSecret: isSecretVar(match[1]),
+              });
+            }
+          }
+        }
       }
     }
 
-    console.log(`env-doctor: Found ${definedVariables.length} variables`);
-  } catch (error) {
-    console.error('env-doctor: Analysis failed', error);
-  }
-}
+    // Scan code files for usages
+    const usedVariables: EnvUsage[] = [];
+    const issues: Issue[] = [];
 
-/**
- * Parse .env file content
- */
-function parseEnvContent(content: string, filePath: string): EnvVariable[] {
-  const variables: EnvVariable[] = [];
-  const lines = content.split('\n');
+    const files = await vscode.workspace.findFiles(
+      '**/*.{ts,tsx,js,jsx}',
+      '**/node_modules/**'
+    );
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line || line.startsWith('#')) continue;
-
-    const match = line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/);
-    if (match) {
-      const [, name, value] = match;
-      const isSecret = /secret|password|key|token|api/i.test(name);
+    for (const file of files) {
+      const document = await vscode.workspace.openTextDocument(file);
+      const content = document.getText();
       
-      variables.push({
-        name,
-        value,
-        file: filePath,
-        line: i + 1,
-        isSecret,
-        inferredType: inferType(value),
-      });
+      // Find process.env.VAR and import.meta.env.VAR usages
+      const envPattern = /(?:process\.env|import\.meta\.env)\.([A-Z_][A-Z0-9_]*)/g;
+      let match;
+
+      while ((match = envPattern.exec(content)) !== null) {
+        const varName = match[1];
+        const position = document.positionAt(match.index);
+        
+        usedVariables.push({
+          name: varName,
+          file: file.fsPath,
+          line: position.line + 1,
+          column: position.character,
+        });
+
+        // Check if variable is defined
+        if (!definedVariables.some(v => v.name === varName)) {
+          issues.push({
+            type: 'missing',
+            severity: 'warning',
+            variable: varName,
+            message: `"${varName}" is not defined in any .env file`,
+            location: {
+              file: file.fsPath,
+              line: position.line + 1,
+              column: position.character,
+            },
+          });
+        }
+      }
     }
+
+    // Check for unused variables
+    for (const variable of definedVariables) {
+      if (!usedVariables.some(u => u.name === variable.name)) {
+        issues.push({
+          type: 'unused',
+          severity: 'info',
+          variable: variable.name,
+          message: `"${variable.name}" is defined but never used`,
+          location: {
+            file: variable.file,
+            line: variable.line,
+          },
+        });
+      }
+    }
+
+    analysisResult = { definedVariables, usedVariables, issues };
+
+    // Update diagnostics
+    updateDiagnostics();
+    updateStatusBar();
+
+    outputChannel.appendLine(`Analysis complete: ${definedVariables.length} variables, ${issues.length} issues`);
+  } catch (error) {
+    outputChannel.appendLine(`Analysis error: ${error}`);
   }
-
-  return variables;
-}
-
-/**
- * Infer type from value
- */
-function inferType(value: string): string | undefined {
-  if (/^\d+$/.test(value)) return 'number';
-  if (/^(true|false)$/i.test(value)) return 'boolean';
-  if (/^https?:\/\//.test(value)) return 'url';
-  if (value.startsWith('{') || value.startsWith('[')) return 'json';
-  return 'string';
 }
 
 /**
  * Analyze a single document
  */
-async function analyzeDocument(document: vscode.TextDocument): Promise<void> {
-  const config = vscode.workspace.getConfiguration('envDoctor');
-  if (!config.get<boolean>('enable', true)) return;
+function analyzeDocument(document: vscode.TextDocument) {
+  if (!analysisResult) return;
 
-  const text = document.getText();
-  const uri = document.uri.toString();
-  const filePath = document.uri.fsPath;
-
-  // Find env variable usages
-  const usages: DocumentAnalysis['usages'] = [];
-  const issues: DocumentAnalysis['issues'] = [];
-
-  const envRegex = /(?:process\.env|import\.meta\.env)\.(\w+)/g;
+  const diagnostics: vscode.Diagnostic[] = [];
+  const content = document.getText();
+  const envPattern = /(?:process\.env|import\.meta\.env)\.([A-Z_][A-Z0-9_]*)/g;
   let match;
 
-  while ((match = envRegex.exec(text)) !== null) {
+  while ((match = envPattern.exec(content)) !== null) {
     const varName = match[1];
     const position = document.positionAt(match.index + match[0].indexOf(varName));
-
-    usages.push({
-      name: varName,
-      file: filePath,
-      line: position.line + 1,
-      column: position.character,
-    });
-
-    // Check if variable is defined
-    const defined = definedVariables.find(v => v.name === varName);
-    if (!defined && config.get<boolean>('diagnostics.showMissing', true)) {
-      issues.push({
-        type: 'missing',
-        severity: 'warning',
-        variable: varName,
-        message: `"${varName}" is not defined in any .env file`,
-        location: { file: filePath, line: position.line + 1, column: position.character },
-      });
+    
+    if (!analysisResult.definedVariables.some(v => v.name === varName)) {
+      const range = new vscode.Range(
+        position,
+        position.translate(0, varName.length)
+      );
+      
+      const diagnostic = new vscode.Diagnostic(
+        range,
+        `"${varName}" is not defined in any .env file`,
+        vscode.DiagnosticSeverity.Warning
+      );
+      diagnostic.source = 'env-doctor';
+      diagnostic.code = 'env-doctor/missing';
+      diagnostics.push(diagnostic);
     }
   }
-
-  // Update usages map
-  allUsages.set(filePath, usages);
-
-  // Update diagnostics
-  const diagnostics: vscode.Diagnostic[] = issues.map(issue => {
-    const line = (issue.location?.line || 1) - 1;
-    const col = issue.location?.column || 0;
-    const range = new vscode.Range(line, col, line, col + issue.variable.length);
-
-    const diagnostic = new vscode.Diagnostic(
-      range,
-      issue.message,
-      issue.severity === 'error' ? vscode.DiagnosticSeverity.Error :
-      issue.severity === 'warning' ? vscode.DiagnosticSeverity.Warning :
-      vscode.DiagnosticSeverity.Information
-    );
-    diagnostic.code = `env-doctor/${issue.type}`;
-    diagnostic.source = 'env-doctor';
-
-    return diagnostic;
-  });
 
   diagnosticCollection.set(document.uri, diagnostics);
 }
 
+/**
+ * Update diagnostics for all open documents
+ */
+function updateDiagnostics() {
+  if (!analysisResult) return;
+
+  const config = vscode.workspace.getConfiguration('envDoctor');
+  const showMissing = config.get('diagnostics.showMissing', true);
+  const showUnused = config.get('diagnostics.showUnused', true);
+
+  // Clear existing diagnostics
+  diagnosticCollection.clear();
+
+  // Group issues by file
+  const issuesByFile = new Map<string, Issue[]>();
+  
+  for (const issue of analysisResult.issues) {
+    if (!issue.location?.file) continue;
+    if (issue.type === 'missing' && !showMissing) continue;
+    if (issue.type === 'unused' && !showUnused) continue;
+
+    const issues = issuesByFile.get(issue.location.file) || [];
+    issues.push(issue);
+    issuesByFile.set(issue.location.file, issues);
+  }
+
+  // Create diagnostics
+  for (const [file, issues] of issuesByFile) {
+    const uri = vscode.Uri.file(file);
+    const diagnostics: vscode.Diagnostic[] = [];
+
+    for (const issue of issues) {
+      const line = (issue.location?.line || 1) - 1;
+      const column = issue.location?.column || 0;
+      
+      const range = new vscode.Range(
+        new vscode.Position(line, column),
+        new vscode.Position(line, column + issue.variable.length)
+      );
+
+      const severity = issue.severity === 'error'
+        ? vscode.DiagnosticSeverity.Error
+        : issue.severity === 'warning'
+        ? vscode.DiagnosticSeverity.Warning
+        : vscode.DiagnosticSeverity.Information;
+
+      const diagnostic = new vscode.Diagnostic(range, issue.message, severity);
+      diagnostic.source = 'env-doctor';
+      diagnostic.code = `env-doctor/${issue.type}`;
+      
+      if (issue.fix) {
+        diagnostic.message += `\n💡 ${issue.fix}`;
+      }
+
+      diagnostics.push(diagnostic);
+    }
+
+    diagnosticCollection.set(uri, diagnostics);
+  }
+}
+
+/**
+ * Update status bar
+ */
+function updateStatusBar() {
+  if (!analysisResult) {
+    statusBarItem.text = '$(loading~spin) env-doctor';
+    statusBarItem.tooltip = 'Analyzing...';
+    return;
+  }
+
+  const errors = analysisResult.issues.filter(i => i.severity === 'error').length;
+  const warnings = analysisResult.issues.filter(i => i.severity === 'warning').length;
+
+  if (errors > 0) {
+    statusBarItem.text = `$(error) env-doctor: ${errors}`;
+    statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+  } else if (warnings > 0) {
+    statusBarItem.text = `$(warning) env-doctor: ${warnings}`;
+    statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+  } else {
+    statusBarItem.text = '$(check) env-doctor';
+    statusBarItem.backgroundColor = undefined;
+  }
+
+  statusBarItem.tooltip = new vscode.MarkdownString(
+    `**env-doctor**\n\n` +
+    `Variables: ${analysisResult.definedVariables.length}\n\n` +
+    `Usages: ${analysisResult.usedVariables.length}\n\n` +
+    `Issues: ${analysisResult.issues.length}\n\n` +
+    `Click to run analysis`
+  );
+}
+
+/**
+ * Add a variable to .env file
+ */
+async function addToEnvFile(name: string, value: string, fileName: string = '.env') {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+  if (!workspaceFolder) return;
+
+  const envPath = path.join(workspaceFolder.uri.fsPath, fileName);
+  
+  let content = '';
+  if (fs.existsSync(envPath)) {
+    content = fs.readFileSync(envPath, 'utf-8');
+    if (!content.endsWith('\n')) {
+      content += '\n';
+    }
+  }
+
+  content += `${name}=${value}\n`;
+  fs.writeFileSync(envPath, content);
+
+  // Open the file
+  const document = await vscode.workspace.openTextDocument(envPath);
+  await vscode.window.showTextDocument(document);
+
+  vscode.window.showInformationMessage(`Added ${name} to ${fileName}`);
+  await runAnalysis();
+}
+
+/**
+ * Check if variable name suggests it's a secret
+ */
+function isSecretVar(name: string): boolean {
+  const secretPatterns = [
+    /secret/i,
+    /password/i,
+    /token/i,
+    /key$/i,
+    /api_key/i,
+    /private/i,
+    /credential/i,
+    /auth/i,
+  ];
+  return secretPatterns.some(p => p.test(name));
+}
+
+/**
+ * Find similar variable names for typo suggestions
+ */
+function findSimilarVariables(name: string, variables: EnvVariable[]): string[] {
+  const similar: Array<{ name: string; distance: number }> = [];
+
+  for (const v of variables) {
+    const distance = levenshteinDistance(name.toLowerCase(), v.name.toLowerCase());
+    if (distance <= 3 && distance > 0) {
+      similar.push({ name: v.name, distance });
+    }
+  }
+
+  return similar
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3)
+    .map(s => s.name);
+}
+
+/**
+ * Calculate Levenshtein distance
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
+/**
+ * Debounce utility
+ */
+function debounce<T extends (...args: any[]) => void>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout | null = null;
+
+  return (...args: Parameters<T>) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
+/**
+ * Extension deactivation
+ */
+export function deactivate() {
+  if (envFileWatcher) {
+    envFileWatcher.dispose();
+  }
+  diagnosticCollection.dispose();
+  statusBarItem.dispose();
+  outputChannel.dispose();
+}

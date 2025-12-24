@@ -4,7 +4,6 @@
 
 import type { EnvDoctorConfig, EnvVariable, EnvUsage } from '../types/index.js';
 import type { EnrichedVariable, SyncConfig } from './types.js';
-import { DEFAULT_SYNC_CONFIG } from './types.js';
 import { formatTemplate } from './formatter.js';
 import { analyze } from '../core.js';
 

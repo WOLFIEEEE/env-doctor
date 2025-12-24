@@ -3,7 +3,7 @@
  */
 
 import pc from 'picocolors';
-import type { MatrixResult, MatrixRow, MatrixIssue, EnvironmentVariableInfo } from './types.js';
+import type { MatrixResult, MatrixRow, EnvironmentVariableInfo } from './types.js';
 
 /**
  * Report matrix to console as a table

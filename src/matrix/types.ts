@@ -2,7 +2,7 @@
  * @fileoverview Types for multi-environment matrix validation
  */
 
-import type { EnvVariable, Issue } from '../types/index.js';
+import type { EnvVariable } from '../types/index.js';
 
 /**
  * Status of a variable in an environment

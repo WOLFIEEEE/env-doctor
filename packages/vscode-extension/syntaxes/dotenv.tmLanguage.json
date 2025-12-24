@@ -1,0 +1,91 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "dotenv",
+  "scopeName": "source.env",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#variable" },
+    { "include": "#export" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.env",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "export": {
+      "patterns": [
+        {
+          "match": "^\\s*(export)\\s+",
+          "captures": {
+            "1": { "name": "keyword.other.export.env" }
+          }
+        }
+      ]
+    },
+    "variable": {
+      "patterns": [
+        {
+          "match": "^\\s*(export\\s+)?([A-Z_][A-Z0-9_]*)\\s*(=)\\s*(.*)?$",
+          "captures": {
+            "1": { "name": "keyword.other.export.env" },
+            "2": { "name": "variable.other.env" },
+            "3": { "name": "keyword.operator.assignment.env" },
+            "4": {
+              "patterns": [
+                { "include": "#string-double" },
+                { "include": "#string-single" },
+                { "include": "#value" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "string-double": {
+      "name": "string.quoted.double.env",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "include": "#escape" },
+        { "include": "#interpolation" }
+      ]
+    },
+    "string-single": {
+      "name": "string.quoted.single.env",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        { "include": "#escape" }
+      ]
+    },
+    "value": {
+      "patterns": [
+        {
+          "name": "constant.numeric.env",
+          "match": "^[0-9]+$"
+        },
+        {
+          "name": "constant.language.boolean.env",
+          "match": "^(true|false)$"
+        },
+        {
+          "name": "string.unquoted.env",
+          "match": ".+"
+        }
+      ]
+    },
+    "escape": {
+      "name": "constant.character.escape.env",
+      "match": "\\\\."
+    },
+    "interpolation": {
+      "name": "variable.other.interpolation.env",
+      "match": "\\$\\{?[A-Z_][A-Z0-9_]*\\}?"
+    }
+  }
+}
+

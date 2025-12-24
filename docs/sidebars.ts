@@ -45,9 +45,6 @@ const sidebars: SidebarsConfig = {
         'frameworks/cra',
       ],
     },
-    'cli-reference',
-    'api-reference',
-    'ci-integration',
     {
       type: 'category',
       label: 'Examples',
@@ -60,9 +57,20 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Help',
+      label: 'Reference',
       collapsed: false,
       items: [
+        'cli-reference',
+        'api-reference',
+        'ci-integration',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Help',
+      collapsed: true,
+      items: [
+        'comparison',
         'faq',
         'troubleshooting',
       ],

@@ -3,7 +3,7 @@
   
   # env-doctor 🩺
 
-  **Analyze and validate environment variables in your codebase**
+  **The complete environment variable management platform**
 
   [![npm version](https://img.shields.io/npm/v/@theaccessibleteam/env-doctor?color=brightgreen)](https://www.npmjs.com/package/@theaccessibleteam/env-doctor)
   [![npm downloads](https://img.shields.io/npm/dm/@theaccessibleteam/env-doctor)](https://www.npmjs.com/package/@theaccessibleteam/env-doctor)
@@ -14,13 +14,25 @@
   [![CI](https://github.com/WOLFIEEEE/env-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/WOLFIEEEE/env-doctor/actions/workflows/ci.yml)
   [![CodeQL](https://github.com/WOLFIEEEE/env-doctor/actions/workflows/codeql.yml/badge.svg)](https://github.com/WOLFIEEEE/env-doctor/actions/workflows/codeql.yml)
   [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://WOLFIEEEE.github.io/env-doctor)
+  [![VS Code](https://img.shields.io/badge/VS%20Code-Extension-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=theaccessibleteam.env-doctor-vscode)
 
   [Documentation](https://WOLFIEEEE.github.io/env-doctor) •
   [Getting Started](#quick-start) •
   [Features](#features) •
+  [VS Code Extension](#vs-code-extension) •
   [Contributing](./CONTRIBUTING.md)
 
 </div>
+
+---
+
+## What's New in v1.1 🎉
+
+- **Runtime Validation** - Type-safe environment variables with `createEnv()`
+- **VS Code Extension** - Real-time diagnostics, autocomplete, and quick fixes
+- **Multi-Environment Matrix** - Compare variables across dev/staging/production
+- **Monorepo Support** - Analyze all packages in a single run with shared variable tracking
+- **Smart Sync** - Auto-generate `.env.example` from code analysis
 
 ---
 
@@ -31,7 +43,7 @@ Environment variables are the #1 cause of "works on my machine" bugs. A missing 
 ```bash
 $ npx @theaccessibleteam/env-doctor
 
-env-doctor v1.0.0 🩺
+env-doctor v1.1.0 🩺
 
 Framework: nextjs (auto-detected)
 Scanned 42 files in 156ms
@@ -56,6 +68,8 @@ Scanned 42 files in 156ms
 
 ## Features
 
+### Core Analysis
+
 | Feature | Description |
 |---------|-------------|
 | 🔍 **Missing Detection** | Find env vars used in code but not defined |
@@ -65,7 +79,18 @@ Scanned 42 files in 156ms
 | 🔐 **Secret Detection** | Find exposed API keys, tokens, passwords |
 | 📜 **Git History Scan** | Find leaked secrets in commit history |
 | ⚡ **Framework Support** | Auto-detect Next.js, Vite, CRA patterns |
-| 📊 **Multiple Formats** | Console, JSON, SARIF output |
+| 📊 **Multiple Formats** | Console, JSON, SARIF, HTML output |
+
+### Advanced Features
+
+| Feature | Description |
+|---------|-------------|
+| 🚀 **Runtime Validation** | Type-safe env vars with TypeScript inference |
+| 🖥️ **VS Code Extension** | Real-time diagnostics and autocomplete |
+| 📊 **Environment Matrix** | Compare variables across environments |
+| 📦 **Monorepo Support** | Analyze all packages with shared tracking |
+| 🔄 **Smart Sync** | Auto-generate `.env.example` templates |
+| 📈 **Dependency Graph** | Visualize env var usage across packages |
 
 ## Quick Start
 
@@ -81,35 +106,124 @@ env-doctor
 npm install -D @theaccessibleteam/env-doctor
 ```
 
+## Runtime Validation
+
+Validate environment variables at startup with full TypeScript support:
+
+```typescript
+// src/env.ts
+import { createEnv } from '@theaccessibleteam/env-doctor/runtime';
+
+export const env = createEnv({
+  server: {
+    DATABASE_URL: { type: 'url', required: true },
+    API_SECRET: { type: 'string', required: true },
+    PORT: { type: 'number', default: 3000 },
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: { type: 'url', required: true },
+  },
+  framework: 'nextjs',
+});
+
+// Full TypeScript inference!
+env.DATABASE_URL  // string (validated URL)
+env.PORT          // number (coerced from string)
+```
+
+**Benefits:**
+- ✅ Fail fast on startup with clear error messages
+- ✅ Full TypeScript type inference
+- ✅ Automatic type coercion (string → number, boolean)
+- ✅ Framework-aware client/server separation
+
+## VS Code Extension
+
+Get real-time environment variable support in your editor:
+
+**Features:**
+- 🔴 **Live Diagnostics** - See errors as you type
+- 💡 **Autocomplete** - Suggestions for `process.env.`
+- 📖 **Hover Info** - See variable values, types, and usages
+- ⚡ **Quick Fixes** - Add missing variables with one click
+- 🔗 **Go to Definition** - Jump to `.env` file definitions
+
+Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=theaccessibleteam.env-doctor-vscode) or search "env-doctor" in VS Code.
+
 ## CLI Commands
 
 ```bash
-# Scan current directory
-env-doctor
+# Basic analysis
+env-doctor                      # Scan current directory
+env-doctor ./packages/api       # Scan specific directory
 
-# Scan specific directory
-env-doctor ./packages/api
+# Setup & configuration
+env-doctor init                 # Initialize config file
+env-doctor fix                  # Auto-fix issues interactively
+env-doctor watch                # Watch mode for development
 
-# Initialize config file
-env-doctor init
+# Advanced features
+env-doctor sync                 # Sync .env.example with code
+env-doctor matrix               # Compare across environments
+env-doctor workspaces           # Analyze monorepo packages
+env-doctor graph                # Generate dependency graph
+env-doctor generate:schema      # Generate TypeScript runtime schema
 
-# Auto-fix issues interactively
-env-doctor fix
+# CI/CD
+env-doctor --ci                 # Exit code 1 on errors
+env-doctor --format json        # Output as JSON
+env-doctor --format sarif       # Output as SARIF for GitHub
+env-doctor --format html        # Generate HTML report
+```
 
-# Watch mode for development
-env-doctor watch
+## Multi-Environment Matrix
 
-# Scan git history for leaked secrets
-env-doctor scan-history
+Compare environment variables across development, staging, and production:
 
-# CI mode (exit code 1 on errors)
-env-doctor --ci
+```bash
+$ env-doctor matrix --envs development,staging,production
 
-# Output as JSON
-env-doctor --format json
+Environment Variable Matrix
+══════════════════════════════════════════════════════════════════
 
-# Output as SARIF (for GitHub Code Scanning)
-env-doctor --format sarif > results.sarif
+Variable          │ development     │ staging         │ production      │ Status
+──────────────────┼─────────────────┼─────────────────┼─────────────────┼────────
+DATABASE_URL      │ ✓ localhost     │ ✓ staging-db    │ ✓ prod-db       │ OK
+API_KEY           │ ✓ dev-key       │ ✗ MISSING       │ ✓ ****          │ ERROR
+REDIS_URL         │ ✓ localhost     │ ✓ staging       │ ✗ MISSING       │ ERROR
+LOG_LEVEL         │ ✓ debug         │ ✓ info          │ ✓ warn          │ OK
+
+══════════════════════════════════════════════════════════════════
+Summary: 4 variables, 2 errors, 0 warnings
+```
+
+## Monorepo Support
+
+Analyze all packages in your monorepo with shared variable tracking:
+
+```bash
+$ env-doctor workspaces
+
+Monorepo Environment Analysis
+══════════════════════════════════════════════════════════════════
+
+📦 @myapp/web (nextjs)
+   .env files: .env, .env.local
+   ✓ No issues
+
+📦 @myapp/api (node)
+   .env files: .env
+   ✗ 2 errors
+
+📦 @myapp/shared (library)
+   ✗ 1 warning
+
+Shared Variables (from root .env)
+─────────────────────────────────────────────────────────
+DATABASE_URL      │ @myapp/web, @myapp/api
+REDIS_URL         │ @myapp/api
+
+Summary: 3 packages, 1 with issues, 2 errors, 1 warning
 ```
 
 ## Configuration
@@ -135,22 +249,60 @@ export default {
     DATABASE_URL: {
       required: true,
       secret: true,
-      pattern: /^postgres(ql)?:\/\//
+      pattern: /^postgres(ql)?:\/\//,
+      description: 'PostgreSQL connection string',
     },
     PORT: {
       type: 'number',
-      default: 3000
+      default: 3000,
     },
     NODE_ENV: {
       type: 'string',
-      enum: ['development', 'production', 'test']
-    }
+      enum: ['development', 'production', 'test'],
+    },
+  },
+  
+  // Multi-environment configuration
+  environments: {
+    development: { envFiles: ['.env.development'] },
+    staging: { envFiles: ['.env.staging'] },
+    production: { envFiles: ['.env.production'], strict: true },
+  },
+  
+  // Monorepo configuration
+  workspaces: {
+    detectFrom: 'auto', // 'npm' | 'yarn' | 'pnpm' | 'turbo' | 'nx'
+    rootEnvFiles: ['.env'],
+    inheritance: 'cascade',
   },
   
   // Ignore specific variables
-  ignore: ['INTERNAL_*', 'DEBUG_*']
+  ignore: ['INTERNAL_*', 'DEBUG_*'],
 };
 ```
+
+## Comparison: env-doctor vs Alternatives
+
+| Feature | env-doctor | dotenv-linter | envalid | t3-env |
+|---------|------------|---------------|---------|--------|
+| **Static Analysis** | ✅ | ✅ | ❌ | ❌ |
+| **Runtime Validation** | ✅ | ❌ | ✅ | ✅ |
+| **TypeScript Types** | ✅ | ❌ | ✅ | ✅ |
+| **VS Code Extension** | ✅ | ❌ | ❌ | ❌ |
+| **Multi-Environment** | ✅ | ❌ | ❌ | ❌ |
+| **Monorepo Support** | ✅ | ❌ | ❌ | ❌ |
+| **Auto-fix** | ✅ | ✅ | ❌ | ❌ |
+| **Git History Scan** | ✅ | ❌ | ❌ | ❌ |
+| **Sync .env.example** | ✅ | ❌ | ❌ | ❌ |
+| **CI/CD Integration** | ✅ | ✅ | ❌ | ❌ |
+| **SARIF Output** | ✅ | ❌ | ❌ | ❌ |
+| **Framework Aware** | ✅ | ❌ | ✅ | ✅ |
+
+**When to use env-doctor:**
+- You need both static analysis AND runtime validation
+- You work with monorepos or multiple environments
+- You want IDE support with autocomplete and diagnostics
+- You need CI/CD integration with SARIF reports
 
 ## Framework Support
 
@@ -219,6 +371,31 @@ if (result.stats.errorCount > 0) {
 }
 ```
 
+### Runtime Validation API
+
+```typescript
+import { createEnv, mockEnv } from '@theaccessibleteam/env-doctor/runtime';
+
+// Create validated env object
+const env = createEnv({
+  server: {
+    DATABASE_URL: { type: 'url', required: true },
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: { type: 'url', required: true },
+  },
+});
+
+// For testing - mock environment variables
+mockEnv({
+  DATABASE_URL: 'postgres://localhost:5432/test',
+  NEXT_PUBLIC_API_URL: 'http://localhost:3000',
+});
+
+// Restore original env
+mockEnv.restore();
+```
+
 ## Documentation
 
 📚 **Full documentation**: [https://WOLFIEEEE.github.io/env-doctor](https://WOLFIEEEE.github.io/env-doctor)
@@ -226,9 +403,11 @@ if (result.stats.errorCount > 0) {
 - [Installation Guide](https://WOLFIEEEE.github.io/env-doctor/docs/getting-started/installation)
 - [Configuration Reference](https://WOLFIEEEE.github.io/env-doctor/docs/getting-started/configuration)
 - [CLI Reference](https://WOLFIEEEE.github.io/env-doctor/docs/cli-reference)
+- [Runtime Validation](https://WOLFIEEEE.github.io/env-doctor/docs/features/runtime-validation)
+- [Multi-Environment](https://WOLFIEEEE.github.io/env-doctor/docs/features/multi-environment)
+- [Monorepo Guide](https://WOLFIEEEE.github.io/env-doctor/docs/examples/monorepo)
+- [VS Code Extension](https://WOLFIEEEE.github.io/env-doctor/docs/features/ide-extension)
 - [API Reference](https://WOLFIEEEE.github.io/env-doctor/docs/api-reference)
-- [CI/CD Integration](https://WOLFIEEEE.github.io/env-doctor/docs/ci-integration)
-- [Framework Guides](https://WOLFIEEEE.github.io/env-doctor/docs/frameworks/nextjs)
 
 ## Contributing
 

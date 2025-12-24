@@ -2,7 +2,7 @@
  * @fileoverview Template formatter for generating .env.example files
  */
 
-import type { EnrichedVariable, SyncConfig, TemplateSection } from './types.js';
+import type { EnrichedVariable, SyncConfig } from './types.js';
 import { DEFAULT_SYNC_CONFIG, DEFAULT_CATEGORIES } from './types.js';
 
 /**

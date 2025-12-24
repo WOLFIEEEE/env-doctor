@@ -8,7 +8,6 @@ import type {
   MatrixRow,
   MatrixIssue,
   EnvironmentVariableInfo,
-  VariableStatus,
 } from './types.js';
 
 /**
@@ -48,7 +47,6 @@ export function compareEnvironments(options: CompareOptions): MatrixRow[] {
 
   // Build matrix rows
   const rows: MatrixRow[] = [];
-  const envNames = environments.map(e => e.name);
 
   for (const varName of Array.from(allVariables).sort()) {
     const row = buildMatrixRow(varName, environments, config);

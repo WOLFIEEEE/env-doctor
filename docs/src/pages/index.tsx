@@ -280,6 +280,112 @@ function DemoSection() {
   );
 }
 
+function VSCodeExtensionSection() {
+  return (
+    <section className={styles.vscodeSection}>
+      <div className="container">
+        <div className={styles.sectionHeader}>
+          <span className={styles.newBadge}>IDE Integration</span>
+          <Heading as="h2">VS Code Extension</Heading>
+          <p>Get real-time environment variable support directly in your editor</p>
+        </div>
+        <div className={styles.vscodeGrid}>
+          <div className={styles.vscodeFeatureList}>
+            <div className={styles.vscodeFeature}>
+              <div className={styles.vscodeFeatureIcon}>🔴</div>
+              <div className={styles.vscodeFeatureContent}>
+                <h4>Live Diagnostics</h4>
+                <p>See errors and warnings as you type, without running the CLI</p>
+              </div>
+            </div>
+            <div className={styles.vscodeFeature}>
+              <div className={styles.vscodeFeatureIcon}>💡</div>
+              <div className={styles.vscodeFeatureContent}>
+                <h4>Smart Autocomplete</h4>
+                <p>Get suggestions when typing <code>process.env.</code> with values and types</p>
+              </div>
+            </div>
+            <div className={styles.vscodeFeature}>
+              <div className={styles.vscodeFeatureIcon}>📖</div>
+              <div className={styles.vscodeFeatureContent}>
+                <h4>Hover Information</h4>
+                <p>See variable value, type, source file, and usage count on hover</p>
+              </div>
+            </div>
+            <div className={styles.vscodeFeature}>
+              <div className={styles.vscodeFeatureIcon}>⚡</div>
+              <div className={styles.vscodeFeatureContent}>
+                <h4>Quick Fixes</h4>
+                <p>Add missing variables to .env with one click, fix typos automatically</p>
+              </div>
+            </div>
+            <div className={styles.vscodeFeature}>
+              <div className={styles.vscodeFeatureIcon}>🔗</div>
+              <div className={styles.vscodeFeatureContent}>
+                <h4>Go to Definition</h4>
+                <p>Jump from usage to the definition in your .env file</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.vscodeDemo}>
+            <div className={styles.vscodeMockup}>
+              <div className={styles.vscodeMockupHeader}>
+                <div className={styles.vscodeMockupDots}>
+                  <span></span><span></span><span></span>
+                </div>
+                <span className={styles.vscodeMockupTitle}>src/lib/db.ts - VS Code</span>
+              </div>
+              <div className={styles.vscodeMockupContent}>
+                <pre className={styles.vscodeMockupCode}>{`import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.`}<span className={styles.vscodeAutocomplete}>DATABASE_URL</span>{`
+    }
+  }
+});`}</pre>
+                <div className={styles.vscodePopup}>
+                  <div className={styles.vscodePopupItem}>
+                    <span className={styles.vscodePopupIcon}>$</span>
+                    <span className={styles.vscodePopupName}>DATABASE_URL</span>
+                    <span className={styles.vscodePopupValue}>postgres://...</span>
+                  </div>
+                  <div className={styles.vscodePopupItem}>
+                    <span className={styles.vscodePopupIcon}>$</span>
+                    <span className={styles.vscodePopupName}>DATABASE_POOL_SIZE</span>
+                    <span className={styles.vscodePopupValue}>10</span>
+                  </div>
+                  <div className={styles.vscodePopupItem}>
+                    <span className={styles.vscodePopupIcon}>$</span>
+                    <span className={styles.vscodePopupName}>DATABASE_SSL</span>
+                    <span className={styles.vscodePopupValue}>true</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={styles.vscodeCTA}>
+          <a 
+            href="https://marketplace.visualstudio.com/items?itemName=theaccessibleteam.env-doctor-vscode"
+            className="button button--primary button--lg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Install VS Code Extension
+          </a>
+          <Link
+            className="button button--secondary button--lg"
+            to="/docs/features/ide-extension">
+            Learn More
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function RuntimeValidationSection() {
   return (
     <section className={styles.codeShowcaseSection}>
@@ -367,6 +473,151 @@ DEBUG_MODE         │ ✓ true  │ ✓ true  │ ✓ true  │ WARN
 
 Summary: 1 error, 1 warning`}</pre>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MonorepoSection() {
+  return (
+    <section className={styles.codeShowcaseSection}>
+      <div className="container">
+        <div className={styles.codeShowcaseGrid}>
+          <div className={styles.codeShowcaseContent}>
+            <span className={styles.newBadge}>Monorepo Support</span>
+            <Heading as="h2">Analyze Entire Workspaces</Heading>
+            <p>
+              Full support for npm, yarn, pnpm workspaces, plus deep integration with 
+              Turborepo and Nx. Track shared variables, detect conflicts, and visualize dependencies.
+            </p>
+            <ul className={styles.benefitsList}>
+              <li>✓ Auto-detect workspace configuration</li>
+              <li>✓ Track shared variables across packages</li>
+              <li>✓ Detect variable conflicts</li>
+              <li>✓ Generate dependency graphs</li>
+            </ul>
+            <Link
+              className="button button--secondary button--lg"
+              to="/docs/examples/monorepo">
+              Learn More
+            </Link>
+          </div>
+          <div className={styles.codeShowcaseCode}>
+            <pre className={styles.codeBlock}>{`$ npx env-doctor workspaces
+
+Monorepo Environment Analysis
+═══════════════════════════════════════════════════════
+
+📦 @myapp/web (nextjs)
+   .env files: .env, .env.local
+   ✓ No issues
+
+📦 @myapp/api (node)
+   .env files: .env
+   ✗ 2 errors: DATABASE_URL, REDIS_URL
+
+📦 @myapp/shared (library)
+   ⚠ 1 warning: unused LEGACY_API_KEY
+
+Shared Variables (from root)
+───────────────────────────────────────────────────────
+DATABASE_URL    │ @myapp/web, @myapp/api
+API_SECRET      │ @myapp/api
+
+Summary: 3 packages, 2 errors, 1 warning`}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ComparisonSection() {
+  return (
+    <section className={styles.comparisonSection}>
+      <div className="container">
+        <div className={styles.sectionHeader}>
+          <Heading as="h2">Why env-doctor?</Heading>
+          <p>The complete solution for environment variable management</p>
+        </div>
+        <div className={styles.comparisonTable}>
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>env-doctor</th>
+                <th>dotenv-linter</th>
+                <th>envalid</th>
+                <th>t3-env</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Static Analysis</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+              <tr>
+                <td>Runtime Validation</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.check}>✓</td>
+              </tr>
+              <tr>
+                <td>TypeScript Types</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.check}>✓</td>
+              </tr>
+              <tr>
+                <td>VS Code Extension</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+              <tr>
+                <td>Multi-Environment</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+              <tr>
+                <td>Monorepo Support</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+              <tr>
+                <td>Git History Scan</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+              <tr>
+                <td>Sync .env.example</td>
+                <td className={styles.check}>✓</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+                <td className={styles.cross}>✗</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className={styles.comparisonCTA}>
+          <Link
+            className="button button--primary button--lg"
+            to="/docs/comparison">
+            Full Comparison
+          </Link>
         </div>
       </div>
     </section>
@@ -487,8 +738,11 @@ export default function Home(): JSX.Element {
         <FeaturesSection />
         <AdvancedFeaturesSection />
         <DemoSection />
+        <VSCodeExtensionSection />
         <RuntimeValidationSection />
         <MatrixSection />
+        <MonorepoSection />
+        <ComparisonSection />
         <PromptSection />
         <CISection />
       </main>

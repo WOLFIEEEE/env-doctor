@@ -589,6 +589,278 @@
   overflow-x: auto;
 }
 
+/* VS Code Extension Section */
+.vscodeSection {
+  padding: 5rem 0;
+  background: linear-gradient(180deg, #1e1e1e 0%, #0d1117 100%);
+  color: white;
+}
+
+.vscodeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.vscodeFeatureList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.vscodeFeature {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.vscodeFeature:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateX(4px);
+}
+
+.vscodeFeatureIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.vscodeFeatureContent h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: white;
+}
+
+.vscodeFeatureContent p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.vscodeFeatureContent code {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.vscodeDemo {
+  display: flex;
+  justify-content: center;
+}
+
+.vscodeMockup {
+  width: 100%;
+  max-width: 500px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vscodeMockupHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #323232;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.vscodeMockupDots {
+  display: flex;
+  gap: 6px;
+}
+
+.vscodeMockupDots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.vscodeMockupDots span:nth-child(1) {
+  background: #ff5f56;
+}
+
+.vscodeMockupDots span:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.vscodeMockupDots span:nth-child(3) {
+  background: #27c93f;
+}
+
+.vscodeMockupTitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.vscodeMockupContent {
+  position: relative;
+  padding: 1rem;
+}
+
+.vscodeMockupCode {
+  margin: 0;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #d4d4d4;
+  white-space: pre;
+}
+
+.vscodeAutocomplete {
+  background: #264f78;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.vscodePopup {
+  position: absolute;
+  left: 200px;
+  top: 100px;
+  background: #252526;
+  border: 1px solid #454545;
+  border-radius: 4px;
+  min-width: 250px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.vscodePopupItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.vscodePopupItem:first-child {
+  background: #04395e;
+}
+
+.vscodePopupItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vscodePopupIcon {
+  color: #9cdcfe;
+  font-weight: bold;
+}
+
+.vscodePopupName {
+  color: #9cdcfe;
+  flex: 1;
+}
+
+.vscodePopupValue {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+.vscodeCTA {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.vscodeCTA .button--primary {
+  background: #007acc;
+  border-color: #007acc;
+}
+
+.vscodeCTA .button--primary:hover {
+  background: #005a9e;
+  border-color: #005a9e;
+}
+
+.vscodeCTA .button--secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.vscodeCTA .button--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.vscodeSection .sectionHeader h2 {
+  color: white;
+}
+
+.vscodeSection .sectionHeader p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Comparison Section */
+.comparisonSection {
+  padding: 5rem 0;
+  background: var(--ifm-background-color);
+}
+
+.comparisonTable {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  overflow-x: auto;
+}
+
+.comparisonTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.comparisonTable th {
+  background: var(--ifm-color-emphasis-100);
+  font-weight: 600;
+}
+
+.comparisonTable th:first-child,
+.comparisonTable td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.comparisonTable th:nth-child(2) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+  color: var(--ifm-color-primary);
+}
+
+.comparisonTable td:nth-child(2) {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.comparisonTable .check {
+  color: #10b981;
+  font-size: 1.25rem;
+}
+
+.comparisonTable .cross {
+  color: #6b7280;
+  font-size: 1.25rem;
+}
+
+.comparisonCTA {
+  text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 996px) {
   .heroTitle {
@@ -639,6 +911,22 @@
   
   .codeShowcaseContent .button {
     margin: 0 auto;
+  }
+}
+
+@media (max-width: 996px) {
+  .vscodeGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .vscodeDemo {
+    order: -1;
+  }
+  
+  .vscodePopup {
+    left: 100px;
+    top: 80px;
   }
 }
 
@@ -696,5 +984,36 @@
   .codeShowcaseCode {
     margin: 0 -1rem;
     border-radius: 0;
+  }
+  
+  .vscodeSection {
+    padding: 3rem 0;
+  }
+  
+  .vscodeMockup {
+    margin: 0 -1rem;
+    border-radius: 0;
+  }
+  
+  .vscodePopup {
+    display: none;
+  }
+  
+  .vscodeCTA {
+    flex-direction: column;
+  }
+  
+  .vscodeCTA .button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .comparisonTable {
+    font-size: 0.8rem;
+  }
+  
+  .comparisonTable th,
+  .comparisonTable td {
+    padding: 0.5rem;
   }
 }

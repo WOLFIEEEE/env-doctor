@@ -2,7 +2,6 @@
  * @fileoverview Multi-environment matrix validation
  */
 
-import { resolve } from 'node:path';
 import type { EnvDoctorConfig } from '../types/index.js';
 import type { MatrixResult, MatrixSummary, ParsedEnvironment } from './types.js';
 import { parseEnvFiles } from '../scanner/env-parser.js';

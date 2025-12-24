@@ -122,7 +122,7 @@ function reportPackageResult(result: PackageAnalysisResult, verbose: boolean): v
   console.log(pc.gray(`   ${definedCount} defined, ${usedCount} used`));
 
   // Issues
-  const { errorCount, warningCount, infoCount } = analysis.stats;
+  const { errorCount, warningCount } = analysis.stats;
   
   if (errorCount === 0 && warningCount === 0) {
     console.log(`   ${pc.green('✓')} No issues`);

@@ -3,10 +3,9 @@
  */
 
 import { resolve, join } from 'node:path';
-import { readFile, readdir, stat } from 'node:fs/promises';
-import type { WorkspaceDetectionResult, WorkspaceType, PackageInfo } from './types.js';
+import { readFile, readdir } from 'node:fs/promises';
+import type { WorkspaceDetectionResult, PackageInfo } from './types.js';
 import { fileExists, readJsonFile } from '../utils/fs.js';
-import { findFiles } from '../utils/glob.js';
 import { logger } from '../utils/logger.js';
 import { detectFramework } from '../frameworks/index.js';
 

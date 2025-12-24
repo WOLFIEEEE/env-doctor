@@ -2,7 +2,7 @@
  * @fileoverview Dependency graph visualization for workspace analysis
  */
 
-import type { WorkspaceAnalysisResult, SharedVariable, PackageAnalysisResult } from './types.js';
+import type { WorkspaceAnalysisResult } from './types.js';
 
 /**
  * Graph node types

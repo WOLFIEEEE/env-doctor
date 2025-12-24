@@ -202,6 +202,34 @@
   font-weight: 600;
 }
 
+/* Package names - cyan for visibility */
+.packageName {
+  color: #22d3ee;
+  font-weight: 600;
+}
+
+/* Table lines - dimmed for structure */
+.tableLine {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* Comment lines - green */
+.commentLine {
+  color: #34d399;
+  font-style: italic;
+}
+
+/* Operator (=) - gray */
+.operator {
+  color: #9ca3af;
+}
+
+/* Variable values - light cyan */
+.variableValue {
+  color: #67e8f9;
+}
+
 /* Ensure all text in output is readable */
 .output code,
 .output strong {

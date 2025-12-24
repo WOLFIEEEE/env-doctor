@@ -4,7 +4,6 @@
 
 import { resolve } from 'node:path';
 import type {
-  WorkspaceDetectionResult,
   PackageInfo,
   PackageAnalysisResult,
   WorkspaceAnalysisResult,

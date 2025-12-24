@@ -5,18 +5,24 @@
  * environment variable validation in IDEs.
  */
 
-import type { EnvDoctorConfig, EnvVariable, EnvUsage, Issue } from '../types/index.js';
-import type { WorkspaceState, DocumentAnalysis, EnvCompletionData, EnvHoverData, SEVERITY_MAP, DIAGNOSTIC_CODES } from './types.js';
+import type { EnvDoctorConfig, EnvUsage, Issue } from '../types/index.js';
+import type { WorkspaceState, DocumentAnalysis, EnvCompletionData, EnvHoverData } from './types.js';
 import { loadConfig } from '../config.js';
 import { analyze } from '../core.js';
-import { parseEnvFiles } from '../scanner/env-parser.js';
 import { scanFileContent } from '../scanner/code-scanner.js';
 import { logger } from '../utils/logger.js';
+
+// Import providers
+import { debounce, issuesToDiagnostics } from './diagnostics.js';
+import { isEnvContext, createCompletionItems, createEnvSnippets } from './completion.js';
+import { findEnvVariableAtPosition, createHoverData } from './hover.js';
+import { findDefinition, findReferences, isEnvFile, parseEnvFileLine, findUsagesOfEnvVariable } from './definition.js';
+import { getCodeActionsForDiagnostic, getSourceActions, findSimilarVariables } from './actions.js';
 
 /**
  * LSP Server class
  * 
- * This is a simplified implementation that can be integrated with
+ * This is a complete implementation that can be integrated with
  * vscode-languageserver when the extension is built.
  */
 export class EnvDoctorServer {
@@ -24,6 +30,14 @@ export class EnvDoctorServer {
   private config: EnvDoctorConfig | null = null;
   private debounceTimer: NodeJS.Timeout | null = null;
   private readonly debounceMs = 300;
+
+  // Debounced analysis function
+  private debouncedAnalyze = debounce(
+    (uri: string, content: string, version: number) => {
+      this.analyzeDocument(uri, content, version);
+    },
+    this.debounceMs
+  );
 
   /**
    * Initialize the server with a workspace
@@ -57,7 +71,6 @@ export class EnvDoctorServer {
   async runFullAnalysis(): Promise<void> {
     if (!this.state || !this.config) return;
 
-    const rootPath = this.state.rootUri.replace('file://', '');
     const result = await analyze({ config: this.config });
 
     this.state.definedVariables = result.definedVariables;
@@ -127,7 +140,7 @@ export class EnvDoctorServer {
       // Check if variable is defined
       if (!definedNames.has(usage.name)) {
         // Find similar variable names for suggestions
-        const similar = this.findSimilarVariables(usage.name);
+        const similar = findSimilarVariables(usage.name, this.state.definedVariables);
         
         issues.push({
           type: 'missing',
@@ -144,55 +157,59 @@ export class EnvDoctorServer {
             : `Add "${usage.name}" to your .env file`,
         });
       }
+
+      // Check for secret exposure in client code
+      if (this.isClientFile(usage.file) && this.isSecretVariable(usage.name)) {
+        issues.push({
+          type: 'secret-exposed',
+          severity: 'error',
+          variable: usage.name,
+          message: `Secret "${usage.name}" may be exposed in client-side code`,
+          location: {
+            file: usage.file,
+            line: usage.line,
+            column: usage.column,
+          },
+          fix: 'Move this to server-side code or use a public variable',
+        });
+      }
     }
 
     return issues;
   }
 
   /**
-   * Find similar variable names (for typo suggestions)
+   * Check if file is client-side
    */
-  private findSimilarVariables(name: string): string[] {
-    if (!this.state) return [];
+  private isClientFile(filePath: string): boolean {
+    const clientPatterns = [
+      /\/pages\//,
+      /\/components\//,
+      /\/app\/.*\/page\.(tsx?|jsx?)$/,
+      /\/src\/.*\.(tsx|jsx)$/,
+    ];
+    return clientPatterns.some(p => p.test(filePath));
+  }
 
-    const similar: Array<{ name: string; distance: number }> = [];
+  /**
+   * Check if variable is a secret
+   */
+  private isSecretVariable(name: string): boolean {
+    const rule = this.config?.variables[name];
+    if (rule?.secret) return true;
 
-    for (const v of this.state.definedVariables) {
-      const distance = levenshteinDistance(name.toLowerCase(), v.name.toLowerCase());
-      if (distance <= 3) {
-        similar.push({ name: v.name, distance });
-      }
-    }
-
-    return similar
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3)
-      .map(s => s.name);
+    const secretPatterns = [/secret/i, /password/i, /token/i, /key$/i, /private/i];
+    return secretPatterns.some(p => p.test(name));
   }
 
   /**
    * Get diagnostics for a document
    */
-  getDiagnostics(uri: string): Array<{
-    range: { start: { line: number; character: number }; end: { line: number; character: number } };
-    severity: number;
-    code: string;
-    source: string;
-    message: string;
-  }> {
+  getDiagnostics(uri: string): ReturnType<typeof issuesToDiagnostics> {
     const cached = this.state?.documentCache.get(uri);
     if (!cached) return [];
 
-    return cached.issues.map(issue => ({
-      range: {
-        start: { line: (issue.location?.line || 1) - 1, character: issue.location?.column || 0 },
-        end: { line: (issue.location?.line || 1) - 1, character: (issue.location?.column || 0) + issue.variable.length },
-      },
-      severity: issue.severity === 'error' ? 1 : issue.severity === 'warning' ? 2 : 3,
-      code: `env-doctor/${issue.type}`,
-      source: 'env-doctor',
-      message: issue.message,
-    }));
+    return issuesToDiagnostics(cached.issues);
   }
 
   /**
@@ -203,25 +220,53 @@ export class EnvDoctorServer {
 
     // Check if we're in a process.env context
     const lineContent = content.split('\n')[line] || '';
-    const beforeCursor = lineContent.slice(0, character);
+    const context = isEnvContext(lineContent, character);
 
-    // Look for process.env. or import.meta.env.
-    const envMatch = beforeCursor.match(/(?:process\.env|import\.meta\.env)\.\s*(\w*)$/);
-    if (!envMatch) return [];
+    if (!context) return [];
 
-    const prefix = envMatch[1].toLowerCase();
+    // Get descriptions from config
+    const descriptions: Record<string, string | undefined> = {};
+    if (this.config?.variables) {
+      for (const [name, rule] of Object.entries(this.config.variables)) {
+        descriptions[name] = rule.description;
+      }
+    }
 
     return this.state.definedVariables
-      .filter(v => v.name.toLowerCase().startsWith(prefix))
+      .filter(v => v.name.toLowerCase().startsWith(context.prefix.toLowerCase()))
       .map(v => ({
         name: v.name,
-        value: v.isSecret ? '****' : v.value,
+        value: v.isSecret || this.isSecretVariable(v.name) ? '****' : v.value,
         file: v.file,
         line: v.line,
         type: v.inferredType,
         isSecret: v.isSecret,
-        description: this.config?.variables[v.name]?.description,
+        description: descriptions[v.name],
       }));
+  }
+
+  /**
+   * Get completion items for LSP
+   */
+  getCompletionItems(uri: string, line: number, character: number, content: string) {
+    if (!this.state) return [];
+
+    const lineContent = content.split('\n')[line] || '';
+    const context = isEnvContext(lineContent, character);
+
+    if (!context) {
+      // Return snippets if not in env context
+      return createEnvSnippets();
+    }
+
+    const descriptions: Record<string, string | undefined> = {};
+    if (this.config?.variables) {
+      for (const [name, rule] of Object.entries(this.config.variables)) {
+        descriptions[name] = rule.description;
+      }
+    }
+
+    return createCompletionItems(this.state.definedVariables, context.prefix, descriptions);
   }
 
   /**
@@ -232,180 +277,116 @@ export class EnvDoctorServer {
 
     const lineContent = content.split('\n')[line] || '';
 
-    // Find the variable name at this position
-    const envMatch = lineContent.match(/(?:process\.env|import\.meta\.env)\.(\w+)/g);
-    if (!envMatch) return null;
-
-    // Find the specific match at this position
-    let varName: string | null = null;
-    for (const match of envMatch) {
-      const index = lineContent.indexOf(match);
-      const nameStart = index + match.indexOf('.', match.indexOf('.') + 1) + 1;
-      const nameEnd = nameStart + match.split('.').pop()!.length;
-
-      if (character >= nameStart && character <= nameEnd) {
-        varName = match.split('.').pop()!;
-        break;
+    // Check if this is an .env file
+    if (isEnvFile(uri)) {
+      const parsed = parseEnvFileLine(lineContent, line);
+      if (parsed) {
+        const allUsages: EnvUsage[] = [];
+        for (const usages of this.state.allUsages.values()) {
+          allUsages.push(...usages);
+        }
+        const varUsages = allUsages.filter(u => u.name === parsed.name);
+        
+        return {
+          name: parsed.name,
+          value: lineContent.split('=')[1] || '',
+          file: uri,
+          line: line + 1,
+          usedIn: varUsages.map(u => ({ file: u.file, line: u.line })),
+        };
       }
     }
 
-    if (!varName) return null;
+    // Find the variable name at this position
+    const found = findEnvVariableAtPosition(lineContent, character);
+    if (!found) return null;
 
     // Find the variable definition
-    const variable = this.state.definedVariables.find(v => v.name === varName);
-    if (!variable) {
-      return {
-        name: varName,
-        value: 'NOT DEFINED',
-        file: '',
-        line: 0,
-        usedIn: [],
-      };
+    const variable = this.state.definedVariables.find(v => v.name === found.name);
+    
+    // Get all usages
+    const allUsages: EnvUsage[] = [];
+    for (const usages of this.state.allUsages.values()) {
+      allUsages.push(...usages);
     }
 
-    // Find usages
-    const usedIn: Array<{ file: string; line: number }> = [];
-    for (const [file, usages] of this.state.allUsages) {
-      for (const usage of usages) {
-        if (usage.name === varName) {
-          usedIn.push({ file, line: usage.line });
-        }
-      }
-    }
+    const rule = this.config?.variables[found.name];
 
-    const rule = this.config?.variables[varName];
-
-    return {
-      name: varName,
-      value: variable.isSecret ? '****' : variable.value,
-      type: variable.inferredType || rule?.type,
-      required: rule?.required,
-      file: variable.file,
-      line: variable.line,
-      description: rule?.description,
-      usedIn: usedIn.slice(0, 10), // Limit to 10
-    };
+    return createHoverData(
+      found.name,
+      variable,
+      allUsages,
+      rule?.description,
+      rule?.required,
+      rule?.type
+    );
   }
 
   /**
    * Get definition location for a variable
    */
-  getDefinition(varName: string): { uri: string; range: { start: { line: number; character: number }; end: { line: number; character: number } } } | null {
+  getDefinition(uri: string, line: number, character: number, content: string) {
     if (!this.state) return null;
 
-    const variable = this.state.definedVariables.find(v => v.name === varName);
-    if (!variable) return null;
+    const lineContent = content.split('\n')[line] || '';
 
-    return {
-      uri: `file://${variable.file}`,
-      range: {
-        start: { line: variable.line - 1, character: 0 },
-        end: { line: variable.line - 1, character: variable.name.length },
-      },
-    };
+    // Check if clicking in .env file - go to usages
+    if (isEnvFile(uri)) {
+      const parsed = parseEnvFileLine(lineContent, line);
+      if (parsed) {
+        const usages = findUsagesOfEnvVariable(parsed.name, this.state.allUsages);
+        return usages.length > 0 ? usages[0] : null;
+      }
+    }
+
+    return findDefinition(lineContent, character, this.state.definedVariables);
   }
 
   /**
    * Get all references to a variable
    */
-  getReferences(varName: string): Array<{ uri: string; range: { start: { line: number; character: number }; end: { line: number; character: number } } }> {
+  getReferences(varName: string) {
     if (!this.state) return [];
 
-    const refs: Array<{ uri: string; range: { start: { line: number; character: number }; end: { line: number; character: number } } }> = [];
-
-    // Add definition location
-    const def = this.getDefinition(varName);
-    if (def) {
-      refs.push(def);
-    }
-
-    // Add all usages
-    for (const [file, usages] of this.state.allUsages) {
-      for (const usage of usages) {
-        if (usage.name === varName) {
-          refs.push({
-            uri: `file://${file}`,
-            range: {
-              start: { line: usage.line - 1, character: usage.column },
-              end: { line: usage.line - 1, character: usage.column + varName.length },
-            },
-          });
-        }
-      }
-    }
-
-    return refs;
+    return findReferences(varName, this.state.definedVariables, this.state.allUsages, true);
   }
 
   /**
    * Get code actions (quick fixes) for diagnostics
    */
-  getCodeActions(uri: string, range: { start: { line: number }; end: { line: number } }, diagnostics: Array<{ code?: string; message: string }>): Array<{
-    title: string;
-    kind: string;
-    diagnostics: typeof diagnostics;
-    edit?: {
-      changes: Record<string, Array<{ range: typeof range; newText: string }>>;
-    };
-    command?: {
-      title: string;
-      command: string;
-      arguments?: unknown[];
-    };
-  }> {
-    const actions: Array<{
-      title: string;
-      kind: string;
-      diagnostics: typeof diagnostics;
-      edit?: {
-        changes: Record<string, Array<{ range: typeof range; newText: string }>>;
-      };
-      command?: {
-        title: string;
-        command: string;
-        arguments?: unknown[];
-      };
-    }> = [];
+  getCodeActions(
+    uri: string,
+    _range: { start: { line: number }; end: { line: number } },
+    diagnostics: Array<{ code?: string; message: string; range: { start: { line: number; character: number }; end: { line: number; character: number } } }>
+  ) {
+    if (!this.state) return [];
+
+    const actions: ReturnType<typeof getCodeActionsForDiagnostic> = [];
+
+    // Get the primary .env file path
+    const envFilePath = this.config?.envFiles[0] || '.env';
 
     for (const diagnostic of diagnostics) {
-      if (diagnostic.code === 'env-doctor/missing') {
-        // Extract variable name from message
-        const match = diagnostic.message.match(/"([^"]+)"/);
-        if (match) {
-          const varName = match[1];
+      // Find similar variables for typo suggestions
+      const varNameMatch = diagnostic.message.match(/"([^"]+)"/);
+      const varName = varNameMatch ? varNameMatch[1] : '';
+      
+      const similar = varName
+        ? findSimilarVariables(varName, this.state.definedVariables)
+        : [];
 
-          // Add to .env quick fix
-          actions.push({
-            title: `Add ${varName} to .env`,
-            kind: 'quickfix',
-            diagnostics: [diagnostic],
-            command: {
-              title: `Add ${varName} to .env`,
-              command: 'env-doctor.addToEnv',
-              arguments: [varName],
-            },
-          });
-
-          // Check for similar names
-          const similar = this.findSimilarVariables(varName);
-          for (const suggestion of similar) {
-            actions.push({
-              title: `Change to ${suggestion}`,
-              kind: 'quickfix',
-              diagnostics: [diagnostic],
-              edit: {
-                changes: {
-                  [uri]: [{
-                    range,
-                    newText: suggestion,
-                  }],
-                },
-              },
-            });
-          }
-        }
-      }
+      actions.push(
+        ...getCodeActionsForDiagnostic(
+          diagnostic,
+          uri,
+          envFilePath,
+          similar
+        )
+      );
     }
+
+    // Add source actions
+    actions.push(...getSourceActions(uri));
 
     return actions;
   }
@@ -414,13 +395,7 @@ export class EnvDoctorServer {
    * Handle document change (debounced)
    */
   onDocumentChange(uri: string, content: string, version: number): void {
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-    }
-
-    this.debounceTimer = setTimeout(() => {
-      this.analyzeDocument(uri, content, version);
-    }, this.debounceMs);
+    this.debouncedAnalyze(uri, content, version);
   }
 
   /**
@@ -432,6 +407,20 @@ export class EnvDoctorServer {
       this.state.documentCache.clear();
     }
     await this.runFullAnalysis();
+  }
+
+  /**
+   * Get workspace state
+   */
+  getState(): WorkspaceState | null {
+    return this.state;
+  }
+
+  /**
+   * Get config
+   */
+  getConfig(): EnvDoctorConfig | null {
+    return this.config;
   }
 
   /**
@@ -447,40 +436,8 @@ export class EnvDoctorServer {
 }
 
 /**
- * Calculate Levenshtein distance between two strings
- */
-function levenshteinDistance(a: string, b: string): number {
-  const matrix: number[][] = [];
-
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
-  }
-
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
-  }
-
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
-    }
-  }
-
-  return matrix[b.length][a.length];
-}
-
-/**
  * Create and export a singleton server instance
  */
 export function createServer(): EnvDoctorServer {
   return new EnvDoctorServer();
 }
-
