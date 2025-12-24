@@ -81,8 +81,8 @@ function HomepageHeader() {
             </a>
           </div>
           <p className={styles.heroDescription}>
-            Detect missing, unused, and misconfigured environment variables before they cause runtime errors.
-            Framework-aware scanning for Next.js, Vite, and more.
+            The complete environment variable management platform. Static analysis, runtime validation, 
+            multi-environment support, and IDE integration for JavaScript/TypeScript projects.
           </p>
           <div className={styles.buttons}>
             <Link
@@ -112,7 +112,7 @@ function HomepageHeader() {
   );
 }
 
-const features = [
+const coreFeatures = [
   {
     title: 'Missing Variable Detection',
     description: 'Find environment variables used in your code that aren\'t defined in your .env files.',
@@ -134,8 +134,8 @@ const features = [
     icon: <BarChartIcon size={24} />,
   },
   {
-    title: 'Sync Check',
-    description: 'Keep .env and .env.example in sync automatically.',
+    title: 'Smart Sync',
+    description: 'Auto-generate and maintain .env.example with types, descriptions, and grouping.',
     icon: <RefreshIcon size={24} />,
   },
   {
@@ -145,20 +145,59 @@ const features = [
   },
 ];
 
+const advancedFeatures = [
+  {
+    title: 'Runtime Validation',
+    description: 'Type-safe env vars with automatic coercion, validation at startup, and full TypeScript inference.',
+    icon: <CodeIcon size={24} />,
+    link: '/docs/features/runtime-validation',
+  },
+  {
+    title: 'Multi-Environment Matrix',
+    description: 'Compare dev/staging/production side-by-side. Catch inconsistencies before deployment.',
+    icon: <BarChartIcon size={24} />,
+    link: '/docs/features/multi-environment',
+  },
+  {
+    title: 'Monorepo Support',
+    description: 'npm, yarn, pnpm, Turborepo, Nx. Track shared vars, detect conflicts, visualize dependencies.',
+    icon: <FileSearchIcon size={24} />,
+    link: '/docs/examples/monorepo',
+  },
+  {
+    title: 'VS Code Extension',
+    description: 'Real-time diagnostics, autocomplete, hover info, go-to-definition, and quick fixes.',
+    icon: <SettingsIcon size={24} />,
+    link: '/docs/features/ide-extension',
+  },
+];
+
 interface FeatureProps {
   title: string;
   description: string;
   icon: React.ReactNode;
+  link?: string;
 }
 
-function FeatureCard({title, description, icon}: FeatureProps) {
-  return (
-    <div className={styles.featureCard}>
+function FeatureCard({title, description, icon, link}: FeatureProps) {
+  const content = (
+    <>
       <div className={styles.featureIcon}>{icon}</div>
       <h3>{title}</h3>
       <p>{description}</p>
-    </div>
+    </>
   );
+  
+  if (link) {
+    return (
+      <Link to={link} className={clsx(styles.featureCard, styles.featureCardLink)}>
+        {content}
+        <span className={styles.learnMore}>Learn more →</span>
+      </Link>
+    );
+  }
+  
+  return <div className={styles.featureCard}>{content}</div>;
 }
 
 function FeaturesSection() {
@@ -166,11 +205,30 @@ function FeaturesSection() {
     <section className={styles.features}>
       <div className="container">
         <div className={styles.sectionHeader}>
-          <Heading as="h2">Features</Heading>
-          <p>Everything you need to keep your environment variables healthy</p>
+          <Heading as="h2">Core Features</Heading>
+          <p>Static analysis to catch issues before they reach production</p>
         </div>
         <div className={styles.featureGrid}>
-          {features.map((feature, idx) => (
+          {coreFeatures.map((feature, idx) => (
+            <FeatureCard key={idx} {...feature} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AdvancedFeaturesSection() {
+  return (
+    <section className={clsx(styles.features, styles.advancedFeatures)}>
+      <div className="container">
+        <div className={styles.sectionHeader}>
+          <span className={styles.newBadge}>New in v1.1</span>
+          <Heading as="h2">Advanced Features</Heading>
+          <p>Enterprise-grade environment management for modern teams</p>
+        </div>
+        <div className={styles.featureGrid}>
+          {advancedFeatures.map((feature, idx) => (
             <FeatureCard key={idx} {...feature} />
           ))}
         </div>
@@ -222,6 +280,99 @@ function DemoSection() {
   );
 }
 
+function RuntimeValidationSection() {
+  return (
+    <section className={styles.codeShowcaseSection}>
+      <div className="container">
+        <div className={styles.codeShowcaseGrid}>
+          <div className={styles.codeShowcaseContent}>
+            <span className={styles.newBadge}>Runtime Validation</span>
+            <Heading as="h2">Type-Safe Environment Variables</Heading>
+            <p>
+              Stop using <code>process.env</code> directly. Get full TypeScript inference, 
+              automatic type coercion, and validation at application startup.
+            </p>
+            <ul className={styles.benefitsList}>
+              <li>✓ Fail fast with clear error messages</li>
+              <li>✓ Automatic string → number/boolean conversion</li>
+              <li>✓ Full TypeScript type inference</li>
+              <li>✓ Framework-specific client/server separation</li>
+            </ul>
+            <Link
+              className="button button--secondary button--lg"
+              to="/docs/features/runtime-validation">
+              Learn More
+            </Link>
+          </div>
+          <div className={styles.codeShowcaseCode}>
+            <pre className={styles.codeBlock}>{`// src/env.ts
+import { createEnv } from '@theaccessibleteam/env-doctor/runtime';
+
+export const env = createEnv({
+  server: {
+    DATABASE_URL: { type: 'url', required: true },
+    PORT: { type: 'number', default: 3000 },
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: { type: 'url', required: true },
+  },
+  framework: 'nextjs',
+});
+
+// Fully typed!
+console.log(env.PORT);         // number
+console.log(env.DATABASE_URL); // string`}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MatrixSection() {
+  return (
+    <section className={clsx(styles.codeShowcaseSection, styles.matrixSection)}>
+      <div className="container">
+        <div className={clsx(styles.codeShowcaseGrid, styles.reverse)}>
+          <div className={styles.codeShowcaseContent}>
+            <span className={styles.newBadge}>Multi-Environment</span>
+            <Heading as="h2">Environment Matrix Comparison</Heading>
+            <p>
+              Compare environment variables across development, staging, and production. 
+              Catch inconsistencies and missing variables before deployment.
+            </p>
+            <ul className={styles.benefitsList}>
+              <li>✓ Side-by-side comparison table</li>
+              <li>✓ Environment-specific validation rules</li>
+              <li>✓ Interactive fix mode</li>
+              <li>✓ Export to JSON, CSV, or HTML</li>
+            </ul>
+            <Link
+              className="button button--secondary button--lg"
+              to="/docs/features/multi-environment">
+              Learn More
+            </Link>
+          </div>
+          <div className={styles.codeShowcaseCode}>
+            <pre className={styles.codeBlock}>{`$ npx env-doctor matrix
+
+Environment Variable Matrix
+═══════════════════════════════════════════════════════
+
+Variable           │ dev     │ staging │ prod    │ Status
+───────────────────┼─────────┼─────────┼─────────┼────────
+DATABASE_URL       │ ✓       │ ✓       │ ✓       │ OK
+STRIPE_SECRET_KEY  │ ✓ test  │ ✓ test  │ ✗       │ ERROR
+DEBUG_MODE         │ ✓ true  │ ✓ true  │ ✓ true  │ WARN
+
+Summary: 1 error, 1 warning`}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CISection() {
   return (
     <section className={styles.ciSection}>
@@ -242,7 +393,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+      
+      # Run static analysis
       - run: npx @theaccessibleteam/env-doctor --ci --format sarif > results.sarif
+      
+      # Validate multi-environment matrix
+      - run: npx @theaccessibleteam/env-doctor matrix --ci
+      
+      # Upload to GitHub Code Scanning
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif`}</pre>
@@ -322,12 +480,15 @@ export default function Home(): JSX.Element {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title} - Environment Variable Analyzer`}
-      description="Analyze and validate environment variables in your codebase. Detect missing, unused, and misconfigured env vars with framework-aware scanning.">
+      title={`${siteConfig.title} - Environment Variable Management Platform`}
+      description="The complete environment variable management platform. Static analysis, runtime validation, multi-environment support, and IDE integration for JavaScript/TypeScript.">
       <HomepageHeader />
       <main>
         <FeaturesSection />
+        <AdvancedFeaturesSection />
         <DemoSection />
+        <RuntimeValidationSection />
+        <MatrixSection />
         <PromptSection />
         <CISection />
       </main>

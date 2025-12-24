@@ -15,7 +15,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Features',
+      label: 'Core Features',
       collapsed: false,
       items: [
         'features/missing-vars',
@@ -23,6 +23,16 @@ const sidebars: SidebarsConfig = {
         'features/type-checking',
         'features/secret-detection',
         'features/sync-check',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Advanced Features',
+      collapsed: false,
+      items: [
+        'features/runtime-validation',
+        'features/multi-environment',
+        'features/ide-extension',
       ],
     },
     {

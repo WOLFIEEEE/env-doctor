@@ -443,6 +443,126 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Advanced Features Section */
+.advancedFeatures {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, var(--ifm-background-color) 100%);
+}
+
+[data-theme='dark'] .advancedFeatures {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--ifm-background-color) 100%);
+}
+
+.newBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.featureCardLink {
+  text-decoration: none;
+  display: block;
+}
+
+.featureCardLink:hover {
+  text-decoration: none;
+}
+
+.learnMore {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.featureCardLink:hover .learnMore {
+  text-decoration: underline;
+}
+
+/* Code Showcase Section */
+.codeShowcaseSection {
+  padding: 5rem 0;
+  background: var(--ifm-background-color);
+}
+
+.codeShowcaseGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.codeShowcaseGrid.reverse {
+  direction: rtl;
+}
+
+.codeShowcaseGrid.reverse > * {
+  direction: ltr;
+}
+
+.codeShowcaseContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.codeShowcaseContent p {
+  font-size: 1.1rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 1.5rem;
+}
+
+.codeShowcaseContent code {
+  background: var(--ifm-color-emphasis-100);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.benefitsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.benefitsList li {
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.codeShowcaseCode {
+  background: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.codeShowcaseCode pre {
+  margin: 0;
+  padding: 1.5rem;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* Matrix Section */
+.matrixSection {
+  background: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .matrixSection {
+  background: rgba(15, 23, 42, 0.3);
+}
+
 /* CI Section */
 .ciSection {
   padding: 4rem 0;
@@ -498,6 +618,30 @@
   }
 }
 
+@media (max-width: 996px) {
+  .codeShowcaseGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .codeShowcaseGrid.reverse {
+    direction: ltr;
+  }
+  
+  .codeShowcaseContent {
+    text-align: center;
+  }
+  
+  .benefitsList {
+    display: inline-block;
+    text-align: left;
+  }
+  
+  .codeShowcaseContent .button {
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 600px) {
   .heroTitle {
     font-size: 2.5rem;
@@ -543,5 +687,14 @@
   .promptCode {
     padding: 1rem;
     font-size: 0.8rem;
+  }
+  
+  .codeShowcaseSection {
+    padding: 3rem 0;
+  }
+  
+  .codeShowcaseCode {
+    margin: 0 -1rem;
+    border-radius: 0;
   }
 }

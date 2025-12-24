@@ -1,0 +1,141 @@
+{
+  "name": "env-doctor-vscode",
+  "displayName": "env-doctor",
+  "description": "Real-time environment variable validation and intellisense",
+  "version": "1.0.0",
+  "publisher": "theaccessibleteam",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WOLFIEEEE/env-doctor.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "env",
+    "environment",
+    "dotenv",
+    "validation",
+    "typescript"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/.env*",
+    "workspaceContains:**/env-doctor.config.*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "env-doctor",
+      "properties": {
+        "envDoctor.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable env-doctor diagnostics"
+        },
+        "envDoctor.configPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to env-doctor config file (relative to workspace)"
+        },
+        "envDoctor.envFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [".env", ".env.local", ".env.development"],
+          "description": "Environment files to watch"
+        },
+        "envDoctor.diagnostics.showUnused": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings for unused variables"
+        },
+        "envDoctor.diagnostics.showMissing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings for missing variables"
+        },
+        "envDoctor.diagnostics.showSecrets": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings for exposed secrets"
+        },
+        "envDoctor.autocomplete.showValues": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show variable values in autocomplete"
+        },
+        "envDoctor.autocomplete.redactSecrets": {
+          "type": "boolean",
+          "default": true,
+          "description": "Redact secret values in autocomplete"
+        },
+        "envDoctor.codeLens.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable CodeLens for .env files"
+        },
+        "envDoctor.hover.showUsages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show usage locations in hover"
+        },
+        "envDoctor.hover.maxUsages": {
+          "type": "number",
+          "default": 5,
+          "description": "Maximum number of usages to show in hover"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "env-doctor.analyze",
+        "title": "Analyze Environment Variables",
+        "category": "env-doctor"
+      },
+      {
+        "command": "env-doctor.addToEnv",
+        "title": "Add Variable to .env",
+        "category": "env-doctor"
+      },
+      {
+        "command": "env-doctor.syncTemplate",
+        "title": "Sync .env.example",
+        "category": "env-doctor"
+      },
+      {
+        "command": "env-doctor.showMatrix",
+        "title": "Show Environment Matrix",
+        "category": "env-doctor"
+      }
+    ],
+    "languages": [
+      {
+        "id": "dotenv",
+        "aliases": ["Environment Variables", "dotenv"],
+        "extensions": [".env"],
+        "filenames": [".env", ".env.local", ".env.development", ".env.production", ".env.test", ".env.example"]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "npm run build -- --watch",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@theaccessibleteam/env-doctor": "workspace:*"
+  }
+}
+
