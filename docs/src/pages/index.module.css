@@ -587,6 +587,18 @@
   border-radius: 8px;
   font-size: 0.875rem;
   overflow-x: auto;
+  white-space: pre;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.codeBlock code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 /* VS Code Extension Section */
@@ -715,23 +727,42 @@
   line-height: 1.6;
   color: #d4d4d4;
   white-space: pre;
+  overflow-x: auto;
+}
+
+.vscodeMockupCode code {
+  display: block;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
 }
 
 .vscodeAutocomplete {
   background: #264f78;
-  padding: 0 4px;
-  border-radius: 2px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #4fc3f7;
 }
 
 .vscodePopup {
   position: absolute;
-  left: 200px;
-  top: 100px;
+  left: 220px;
+  top: 80px;
   background: #252526;
   border: 1px solid #454545;
   border-radius: 4px;
-  min-width: 250px;
+  min-width: 280px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10;
 }
 
 .vscodePopupItem {
@@ -925,8 +956,16 @@
   }
   
   .vscodePopup {
-    left: 100px;
-    top: 80px;
+    position: relative;
+    left: auto;
+    top: auto;
+    margin-top: 1rem;
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .vscodeMockupContent {
+    padding-bottom: 1rem;
   }
 }
 

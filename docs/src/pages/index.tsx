@@ -336,15 +336,21 @@ function VSCodeExtensionSection() {
                 <span className={styles.vscodeMockupTitle}>src/lib/db.ts - VS Code</span>
               </div>
               <div className={styles.vscodeMockupContent}>
-                <pre className={styles.vscodeMockupCode}>{`import { PrismaClient } from '@prisma/client';
+                <pre className={styles.vscodeMockupCode}>
+                  <code>
+                    {`import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.`}<span className={styles.vscodeAutocomplete}>DATABASE_URL</span>{`
+      url: process.env.`}
+                    <span className={styles.vscodeAutocomplete}>DATABASE_URL</span>
+                    {`
     }
   }
-});`}</pre>
+});`}
+                  </code>
+                </pre>
                 <div className={styles.vscodePopup}>
                   <div className={styles.vscodePopupItem}>
                     <span className={styles.vscodePopupIcon}>$</span>
